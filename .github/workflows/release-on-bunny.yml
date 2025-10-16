@@ -1,48 +1,23 @@
 
-name: Deploy Bunny Scripting Script
+name: Release on Bunny
 
 on:
   push:
     branches:
+      - main
       - master
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
-  update-script:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Validate Edge Script
-        run: |
-          echo "Validating Bunny Edge Script syntax..."
-          if [ -f "bunny-edge-script.js" ]; then
-            echo "✅ bunny-edge-script.js found"
-          else
-            echo "❌ bunny-edge-script.js not found"
-            exit 1
-          fi
-
-      - name: Check secrets
-        run: |
-          echo "Checking if secrets are available..."
-          if [ -z "${{ secrets.BUNNY_SCRIPT_ID }}" ]; then
-            echo "❌ BUNNY_SCRIPT_ID secret is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.BUNNY_DEPLOYMENT_KEY }}" ]; then
-            echo "❌ BUNNY_DEPLOYMENT_KEY secret is not set"
-            exit 1
-          fi
-          echo "✅ All secrets are available"
-
-      - name: Publish the script to Bunny
-        uses: BunnyWay/actions/deploy-script@main
+      - name: Deploy to Bunny Edge Script
+        uses: bunny-net/edge-scripting-action@v1
         with:
-          script_id: ${{ secrets.BUNNY_SCRIPT_ID }}
-          deployment_key: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
-          file: "bunny-edge-script.js"
+          script: ${{ secrets.BUNNY_SCRIPT_ID }}
+          api_key: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
+          source: .
