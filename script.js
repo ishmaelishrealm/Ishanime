@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = 'https://ishanime-production.up.railway.app'; // Direct Railway backend connection
+const API_URL = 'https://ishanime-backend-production.up.railway.app'; // Working Railway backend
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
