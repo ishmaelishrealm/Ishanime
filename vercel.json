@@ -22,14 +22,10 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "https://ishanime-production.up.railway.app/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/api/(.*)",
+      "destination": "https://ishanime-production.up.railway.app/api/$1"
     }
   ],
   "headers": [
