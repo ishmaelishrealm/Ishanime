@@ -1,23 +1,25 @@
-name: Deploy Frontend + Bunny Edge Script
+name: Deploy IshrealAnime Frontend
 
 on:
   push:
     branches:
-      - main
+      - main  # Deploy when pushing to main
       - master
 
 jobs:
-  frontend-deploy:
-    name: Deploy Frontend to Vercel
+  deploy-frontend:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      # Step 1: Checkout your repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Install Vercel CLI
       - name: Install Vercel CLI
         run: npm install -g vercel
 
-      - name: Deploy Frontend (Static)
+      # Step 3: Deploy static frontend
+      - name: Deploy Frontend (Static HTML/CSS/JS)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -29,20 +31,21 @@ jobs:
             --org=$VERCEL_ORG_ID \
             --prebuilt
 
-  bunny-edge-deploy:
-    name: Deploy Bunny Edge Script
+  deploy-bunny-script:
     runs-on: ubuntu-latest
-    needs: frontend-deploy
+    needs: deploy-frontend
     steps:
-      - name: Checkout repo
+      # Step 1: Checkout repo again
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Bunny CLI
-        run: npm install -g @bunny.net/edgescript-cli
-
+      # Step 2: Deploy Bunny Edge Script
       - name: Deploy Bunny Edge Script
         env:
           BUNNY_SCRIPT_ID: ${{ secrets.BUNNY_SCRIPT_ID }}
           BUNNY_DEPLOYMENT_KEY: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
         run: |
-          edgescript deploy --script-id $BUNNY_SCRIPT_ID --key $BUNNY_DEPLOYMENT_KEY
+          curl -X POST "https://dash.bunny.net/api/script/deploy" \
+            -H "Accept: application/json" \
+            -H "AccessKey: $BUNNY_DEPLOYMENT_KEY" \
+            -d '{"scriptId":'"$BUNNY_SCRIPT_ID"' }'
