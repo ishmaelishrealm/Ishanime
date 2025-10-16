@@ -667,18 +667,6 @@ function goHome() {
     window.location.href = '/';
 }
 
-function exploreShows() {
-    document.querySelector('.shows-section').scrollIntoView({ 
-        behavior: 'smooth' 
-    });
-}
-
-function showFeatured() {
-    filterShows('popular');
-    document.querySelector('.shows-section').scrollIntoView({ 
-        behavior: 'smooth' 
-    });
-}
 
 function showNotifications() {
     alert('Notifications feature coming soon!');
