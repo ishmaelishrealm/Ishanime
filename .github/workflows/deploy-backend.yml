@@ -30,8 +30,7 @@ jobs:
           BUNNY_DEPLOYMENT_KEY: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
         run: |
           echo "🚀 Deploying Bunny Edge Script..."
-          curl -X POST "https://dash.bunny.net/api/script/deploy" \
+          curl -X POST "https://api.bunny.net/edge/script/${BUNNY_SCRIPT_ID}/deploy" \
             -H "Accept: application/json" \
-            -H "AccessKey: $BUNNY_DEPLOYMENT_KEY" \
-            -d '{"scriptId":'"$BUNNY_SCRIPT_ID"' }'
+            -H "AccessKey: $BUNNY_DEPLOYMENT_KEY"
           echo "✅ Bunny Edge Script deployed successfully!"
