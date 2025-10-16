@@ -1,6 +1,6 @@
 // Bunny Edge Scripting - Standalone Script for Ishrealmanime
 // This replaces the Railway Node.js backend entirely
-// Deployed via GitHub Actions - Testing workflow
+// Deployed via GitHub Actions - Ready for deployment
 
 // Import Bunny SDK for environment variables
 import * as BunnySDK from "https://esm.sh/@bunny.net/edgescript-sdk@0.11";
