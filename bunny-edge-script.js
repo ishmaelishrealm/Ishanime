@@ -2,10 +2,13 @@
 // This replaces the Railway Node.js backend entirely
 // Deployed via GitHub Actions
 
-// Configuration - Set these in Bunny Edge Scripting dashboard
-const BUNNY_API_KEY = '7f0a1d07-a8a4-4e07-af7ed42722ee-bfbd-4896'; // Your Bunny API key
-const LIBRARY_ID = '506159'; // Your Bunny Video Library ID
-const DELIVERY_DOMAIN = 'vz-a01fffb9-e7a.b-cdn.net'; // Your Bunny CDN domain
+// Import Bunny SDK for environment variables
+import * as BunnySDK from "https://esm.sh/@bunny.net/edgescript-sdk@0.11";
+
+// Configuration - Using environment variables
+const BUNNY_API_KEY = BunnySDK.env.BUNNY_API_KEY;
+const LIBRARY_ID = BunnySDK.env.LIBRARY_ID;
+const DELIVERY_DOMAIN = BunnySDK.env.DELIVERY_DOMAIN;
 
 // Cache for anime data (Edge Scripting has memory limitations, so keep cache small)
 let animeCache = null;
@@ -114,8 +117,8 @@ async function getAnimeData() {
     }
 }
 
-// Main Edge Script handler
-export default async (request, context) => {
+// Main Edge Script handler using Bunny SDK
+BunnySDK.net.http.serve(async (request) => {
     const url = new URL(request.url);
     const path = url.pathname;
 
@@ -235,4 +238,4 @@ export default async (request, context) => {
             headers: corsHeaders
         });
     }
-};
+});
