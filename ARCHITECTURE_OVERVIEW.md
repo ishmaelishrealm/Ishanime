@@ -13,15 +13,14 @@
 │   ├── edge.config.json         # Bunny config
 │   └── package.json             # Metadata
 └── .github/workflows/            # CI/CD
-    ├── deploy-frontend.yml       # Vercel deployment
-    └── deploy-backend.yml        # Bunny deployment
+    └── deploy-backend.yml        # Bunny deployment only
 ```
 
 ## 🌐 Deployment Flow
 
 ### Frontend (Vercel)
 ```
-GitHub Push → Vercel Auto-Deploy → https://ishanime.vercel.app
+GitHub Push → Vercel Auto-Deploy (via Git integration) → https://ishanime.vercel.app
 ```
 
 ### Backend (Bunny Edge Scripting)

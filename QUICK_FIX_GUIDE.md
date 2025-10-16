@@ -4,15 +4,14 @@
 
 Go to: `https://github.com/ishmaelishrealm/Ishanime/settings/secrets/actions`
 
-Add these **5 secrets**:
+Add these **2 secrets** (only for Bunny Edge Script):
 
 | Secret Name | Value |
 |-------------|-------|
-| `VERCEL_TOKEN` | `YhTst2rzEULthYyHCMRzkDA7` |
-| `VERCEL_PROJECT_ID` | `prj_dVs35euHJ9mbpAgWlbxBZ0LF2WaA` |
-| `VERCEL_ORG_ID` | `ishmaels-projects-2dd9b02f` |
 | `BUNNY_SCRIPT_ID` | `47325` |
 | `BUNNY_DEPLOYMENT_KEY` | `d48c50f9-f1df-4993-a87913c67bbc-ec3f-4bf4` |
+
+**Note**: No Vercel secrets needed! Vercel deploys automatically via GitHub integration.
 
 ## ✅ Step 2: Deploy Everything
 
@@ -24,12 +23,11 @@ git commit -m "Fix deployment workflows and add test script"
 git push origin master
 ```
 
-## ✅ Step 3: Check GitHub Actions
+## ✅ Step 3: Check Deployments
 
-1. Go to: `https://github.com/ishmaelishrealm/Ishanime/actions`
-2. Look for these workflows:
-   - "Deploy Frontend to Vercel" ✅
-   - "Deploy Bunny Edge Script Backend" ✅
+1. **Vercel**: Automatically deploys when you push to GitHub (no workflow needed)
+2. **GitHub Actions**: Go to `https://github.com/ishmaelishrealm/Ishanime/actions`
+   - Look for: "Deploy Bunny Edge Script Backend" ✅
 
 ## ✅ Step 4: Test Your API
 
