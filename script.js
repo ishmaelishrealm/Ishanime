@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = 'https://ishanime-production.up.railway.app'; // Backend URL
+const API_URL = null; // Static mode - no backend connection
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -44,6 +44,21 @@ function setupEventListeners() {
 // Check backend status
 async function checkBackendStatus() {
     const statusElement = document.getElementById('backendStatus');
+    
+    if (!API_URL) {
+        // Static mode - show demo mode message
+        statusElement.innerHTML = `
+            <div class="status-content">
+                <div class="status-icon">🎭</div>
+                <p>Demo Mode - Static anime streaming site</p>
+            </div>
+        `;
+        // Hide status after 3 seconds
+        setTimeout(() => {
+            statusElement.style.display = 'none';
+        }, 3000);
+        return;
+    }
     
     try {
         const response = await fetch(`${API_URL}/api/health`);
@@ -123,6 +138,14 @@ function updateSiteBranding(config) {
 // Load anime from backend
 async function loadAnime() {
     showLoading();
+    
+    if (!API_URL) {
+        // Static mode - load demo data directly
+        console.log('🎭 Static mode - loading demo anime data...');
+        loadDemoAnime();
+        hideLoading();
+        return;
+    }
     
     try {
         console.log('🔄 Fetching anime from backend...');
