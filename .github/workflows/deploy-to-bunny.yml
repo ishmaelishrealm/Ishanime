@@ -25,4 +25,5 @@ jobs:
       uses: BunnyWay/actions/deploy-script@main
       with:
         script_id: ${{ secrets.BUNNY_SCRIPT_ID }}
+        deployment_key: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
         file: "bunny-edge-script.js"
