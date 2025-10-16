@@ -1,6 +1,15 @@
 // Configuration
-const API_URL = 'https://ishanime-backend-production.up.railway.app'; // Working Railway backend
-// Alternative: If you deployed ishanimetest1, use: 'https://ishanimetest1-production-xxxx.up.railway.app'
+// 🚀 REPLACE THIS URL with your actual Bunny Edge Scripting URL after deployment
+// 
+// Steps to get your URL:
+// 1. Deploy bunny-edge-script.js to Bunny Dashboard → Edge Scripting
+// 2. Your URL will be: https://your-script-name.bunnycdn.com
+// 3. Or use your custom domain if configured
+//
+// Example URLs:
+// - https://ishanime-api.bunnycdn.com
+// - https://api.ishanime.me (custom domain)
+const API_URL = 'https://your-script-name.bunnycdn.com'; // ⚠️ UPDATE THIS URL
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;

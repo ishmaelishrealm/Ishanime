@@ -1,0 +1,37 @@
+name: Deploy to Bunny Edge Scripting
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate Edge Script
+      run: |
+        echo "Validating Bunny Edge Script syntax..."
+        node -c bunny-edge-script.js
+        echo "✅ Edge Script syntax is valid"
+        
+    - name: Deploy to Bunny Edge Scripting
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        echo "🚀 Ready to deploy to Bunny Edge Scripting!"
+        echo "📝 Manual deployment steps:"
+        echo "1. Go to Bunny Dashboard → Edge Scripting"
+        echo "2. Create/Update your script with bunny-edge-script.js"
+        echo "3. Deploy the script"
+        echo "4. Update your frontend API_URL with the new script URL"
+        echo ""
+        echo "🔗 Your script URL will be: https://your-script-name.bunnycdn.com"
+        echo "📊 Test endpoints:"
+        echo "  - Health: https://your-script-name.bunnycdn.com/api/health"
+        echo "  - Anime: https://your-script-name.bunnycdn.com/api/anime"
+        echo "  - Site: https://your-script-name.bunnycdn.com/api/site"
