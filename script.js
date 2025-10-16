@@ -1,5 +1,6 @@
 // Configuration
 const API_URL = 'https://ishanime-backend-production.up.railway.app'; // Working Railway backend
+// Alternative: If you deployed ishanimetest1, use: 'https://ishanimetest1-production-xxxx.up.railway.app'
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -162,6 +163,20 @@ async function loadAnime() {
         console.error('❌ Failed to load anime:', error);
         console.error('❌ Error details:', error.message);
         console.error('❌ Error stack:', error.stack);
+        
+        // Show user-friendly error message
+        const statusElement = document.getElementById('backendStatus');
+        if (statusElement) {
+            statusElement.innerHTML = `
+                <div class="status-content">
+                    <div class="status-icon">❌</div>
+                    <p>Backend connection failed: ${error.message}</p>
+                    <p>Check if environment variables are set in Railway</p>
+                </div>
+            `;
+            statusElement.style.display = 'block';
+        }
+        
         loadDemoAnime();
     } finally {
         hideLoading();
