@@ -326,11 +326,11 @@ function createAnimeCard(anime) {
     
     // Get the best available thumbnail
     const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
-    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishmael.png';
+    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'public/assets/ishanime-logo.png';
     
     card.innerHTML = `
         <img src="${thumbnail}" alt="${anime.title}" class="show-thumbnail" 
-             onerror="this.src='assets/ishmael.png'" 
+             onerror="this.src='public/assets/ishanime-logo.png'" 
              loading="lazy">
         <div class="show-info">
             <h3 class="show-title">${anime.title}</h3>
