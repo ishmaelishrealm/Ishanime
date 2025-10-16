@@ -9,7 +9,7 @@
 // Example URLs:
 // - https://ishanime-api.bunnycdn.com
 // - https://api.ishanime.me (custom domain)
-const API_URL = 'https://your-script-name.bunnycdn.com'; // ⚠️ UPDATE THIS URL
+const API_URL = 'https://ishanime-api-pzssf.bunny.run'; // ✅ Bunny Edge Scripting URL
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -180,7 +180,7 @@ async function loadAnime() {
                 <div class="status-content">
                     <div class="status-icon">❌</div>
                     <p>Backend connection failed: ${error.message}</p>
-                    <p>Check if environment variables are set in Railway</p>
+                    <p>Check if Bunny Edge Scripting is deployed</p>
                 </div>
             `;
             statusElement.style.display = 'block';
