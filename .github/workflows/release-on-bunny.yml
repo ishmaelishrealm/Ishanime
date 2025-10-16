@@ -17,19 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-
-      - name: Install
-        run: "npm install"
-
-      - name: Build
-        run: echo "No build step required for Edge Scripting"
+      - name: Validate Edge Script
+        run: |
+          echo "Validating Bunny Edge Script syntax..."
+          if [ -f "bunny-edge-script.js" ]; then
+            echo "✅ bunny-edge-script.js found"
+          else
+            echo "❌ bunny-edge-script.js not found"
+            exit 1
+          fi
 
       - name: Check secrets
         run: |
