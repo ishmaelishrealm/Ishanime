@@ -20,11 +20,9 @@ jobs:
         node -c bunny-edge-script.js
         echo "✅ Edge Script syntax is valid"
         
-    - name: Deploy to Bunny Edge Scripting
+    - name: Deploy Script to Bunny Edge Scripting
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-      uses: bunnycdn/script-deploy-action@v1
+      uses: BunnyWay/actions/deploy-script@main
       with:
-        api-key: ${{ secrets.BUNNY_API_KEY }}
-        script-name: 'ishanime-api'
-        script-file: 'bunny-edge-script.js'
-        script-type: 'standalone'
+        script_id: ${{ secrets.BUNNY_SCRIPT_ID }}
+        file: "bunny-edge-script.js"
