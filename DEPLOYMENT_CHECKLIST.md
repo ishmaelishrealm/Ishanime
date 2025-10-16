@@ -1,137 +1,103 @@
-# 🚀 Deployment Checklist for Ishrealmanime
+# 🐇 Bunny Edge Script + Frontend Sync Checklist
 
-## ✅ Step-by-Step Deployment Guide
+## ✅ Step 1: Verify Bunny Script Deployment
 
-### 1. 📁 Prepare GitHub Repository
+### 1.1 Check Bunny Dashboard
+- [ ] Go to **Bunny Dashboard → Scripts → Standalone Script**
+- [ ] Find your script ID: `47325`
+- [ ] Check deployment status: Should be "Deployed" or "Active"
 
-- [ ] **Fork/Clone this repository**
-- [ ] **Update configuration** in `bunny-edge-script.js`:
-  ```javascript
-  const BUNNY_API_KEY = 'your-actual-api-key';
-  const LIBRARY_ID = 'your-actual-library-id';
-  const DELIVERY_DOMAIN = 'your-actual-domain.b-cdn.net';
-  ```
-- [ ] **Commit and push** to GitHub
+### 1.2 Test Deployment URL
+Test these endpoints in your browser:
 
-### 2. 🌐 Deploy to Bunny Edge Scripting
-
-#### Option A: Bunny Dashboard (Quick)
-- [ ] Login to [Bunny Dashboard](https://dash.bunny.net)
-- [ ] Go to **Edge Scripting**
-- [ ] Click **"Create New Script"**
-- [ ] **Configure**:
-  - Name: `ishanime-api` (or your preferred name)
-  - Type: **Standalone Script**
-  - Region: Choose closest to your users
-- [ ] **Paste code** from `bunny-edge-script.js`
-- [ ] **Save and Deploy**
-
-#### Option B: GitHub Integration (Recommended)
-- [ ] In Bunny Dashboard → Edge Scripting
-- [ ] Click **"Deploy from GitHub"**
-- [ ] **Connect GitHub account**
-- [ ] **Select repository**: `ishanime-edge-script`
-- [ ] **Choose file**: `bunny-edge-script.js`
-- [ ] **Deploy**
-
-### 3. 🔗 Get Your Edge Script URL
-
-After deployment, you'll get a URL like:
-- `https://ishanime-api.bunnycdn.com`
-- Or your custom domain if configured
-
-**Write down this URL - you'll need it for the frontend!**
-
-### 4. 🧪 Test Your Edge Script
-
-Test these endpoints in your browser or with curl:
-
-- [ ] **Health Check**: `https://your-script-name.bunnycdn.com/api/health`
-  - Should return: `{"status":"healthy","service":"Ishanime Bunny Edge Scripting API"}`
+- [ ] **Health Check**: `https://ishanime-api-pzssf.bunny.run/api/health`
+  - Expected: `{"status": "healthy", "timestamp": "...", "service": "Ishanime Bunny Edge Scripting API"}`
   
-- [ ] **Anime API**: `https://your-script-name.bunnycdn.com/api/anime`
-  - Should return: `{"success":true,"data":[...],"count":X}`
-  
-- [ ] **Site Config**: `https://your-script-name.bunnycdn.com/api/site`
-  - Should return: `{"success":true,"data":{"name":"Ishrealmanime",...}}`
+- [ ] **Anime List**: `https://ishanime-api-pzssf.bunny.run/api/anime`
+  - Expected: JSON array of anime objects
 
-### 5. 🎨 Update Frontend
+- [ ] **Site Info**: `https://ishanime-api-pzssf.bunny.run/api/site`
+  - Expected: Site configuration JSON
 
-- [ ] **Open `script.js`**
-- [ ] **Replace the API_URL**:
-  ```javascript
-  const API_URL = 'https://your-actual-script-name.bunnycdn.com';
-  ```
-- [ ] **Save the file**
+### 1.3 If 404 Errors
+- [ ] Redeploy script from Bunny Dashboard
+- [ ] Check GitHub Actions workflow ran successfully
+- [ ] Verify secrets are correct in GitHub
 
-### 6. 🚀 Deploy Frontend
+## ✅ Step 2: Verify Frontend Configuration
 
-#### Option A: Vercel (Recommended)
-- [ ] Install Vercel CLI: `npm i -g vercel`
-- [ ] Run: `vercel --prod`
-- [ ] Your site will be live at: `https://your-project.vercel.app`
+### 2.1 Check API URL
+- [ ] Open `frontend/script.js`
+- [ ] Confirm line 12: `const API_URL = 'https://ishanime-api-pzssf.bunny.run';`
+- [ ] Verify no Railway references remain
 
-#### Option B: Bunny CDN Static Hosting
-- [ ] Upload frontend files to Bunny Storage
-- [ ] Create Pull Zone
-- [ ] Configure custom domain (optional)
+### 2.2 Check Frontend Files
+- [ ] `frontend/index.html` exists
+- [ ] `frontend/script.js` exists  
+- [ ] `frontend/styles.css` exists
+- [ ] `frontend/vercel.json` exists
 
-### 7. 🎯 Final Testing
+## ✅ Step 3: Deploy Frontend
 
-- [ ] **Visit your frontend URL**
-- [ ] **Check browser console** for any errors
-- [ ] **Verify anime loads** from your Bunny Edge Script
-- [ ] **Test video playback**
-- [ ] **Check all navigation** (search, filters, etc.)
+### 3.1 GitHub Secrets (Required)
+Add these to `https://github.com/ishmaelishrealm/Ishanime/settings/secrets/actions`:
 
-### 8. 🎉 You're Done!
+- [ ] `VERCEL_TOKEN`: `YhTst2rzEULthYyHCMRzkDA7`
+- [ ] `VERCEL_PROJECT_ID`: `prj_dVs35euHJ9mbpAgWlbxBZ0LF2WaA`
+- [ ] `VERCEL_ORG_ID`: `ishmaels-projects-2dd9b02f`
+- [ ] `BUNNY_SCRIPT_ID`: `47325`
+- [ ] `BUNNY_DEPLOYMENT_KEY`: `d48c50f9-f1df-4993-a87913c67bbc-ec3f-4bf4`
 
-Your anime streaming platform now runs entirely on Bunny.net:
-- ✅ **Frontend**: Vercel or Bunny CDN
-- ✅ **Backend API**: Bunny Edge Scripting
-- ✅ **Video Storage**: Bunny CDN
-- ✅ **No Railway needed!**
+### 3.2 Trigger Deployment
+- [ ] Push changes to GitHub: `git push origin master`
+- [ ] Check GitHub Actions: `https://github.com/ishmaelishrealm/Ishanime/actions`
+- [ ] Verify both workflows run successfully:
+  - "Deploy Frontend to Vercel"
+  - "Deploy Bunny Edge Script Backend"
 
-## 🔧 Troubleshooting
+## ✅ Step 4: Test Complete System
 
-### Common Issues:
+### 4.1 Test Frontend
+- [ ] Visit: `https://ishanime.vercel.app`
+- [ ] Open browser console (F12)
+- [ ] Check for any fetch errors
+- [ ] Verify anime list loads
+- [ ] Test video playback
 
-**❌ "Backend not connected" message**
-- Check that `API_URL` in `script.js` matches your Edge Script URL
-- Verify Edge Script is deployed and running
-- Check browser console for CORS errors
-
-**❌ No anime data showing**
-- Verify your Bunny API key and Library ID are correct
-- Check that videos in your library follow naming: "Show Name - Episode X"
-- Test the `/api/anime` endpoint directly
-
-**❌ Videos not playing**
-- Check that your Bunny CDN domain is correct
-- Verify video files exist in your Bunny Video Library
-- Test direct video URLs
-
-**❌ CORS errors**
-- Edge Script includes CORS headers automatically
-- Check browser console for specific error messages
-
-## 📊 Performance Verification
-
-After deployment, you should see:
-- **Page load time**: < 2 seconds
-- **API response time**: < 100ms
-- **Video start time**: < 3 seconds
-- **Global performance**: Fast worldwide
-
-## 🎯 Success Metrics
-
-- [ ] Frontend loads without errors
+### 4.2 Test API Connection
+- [ ] Console should show successful API calls
+- [ ] No 404 errors in network tab
 - [ ] Anime data displays correctly
-- [ ] Videos play smoothly
-- [ ] Search and filters work
-- [ ] No Railway dependencies remain
-- [ ] Lower hosting costs achieved
 
----
+## 🚨 Troubleshooting
 
-**🎌 Congratulations! Your serverless anime streaming platform is live!** 🚀
+### If Frontend Shows 404
+1. Check Vercel deployment logs
+2. Verify frontend files are in `/frontend` folder
+3. Check `vercel.json` configuration
+
+### If API Returns 404
+1. Test Bunny Edge Script URL directly in browser
+2. Redeploy script from Bunny Dashboard
+3. Check GitHub Actions workflow for backend deployment
+
+### If Videos Don't Play
+1. Check Bunny CDN video URLs are accessible
+2. Verify CORS headers in Edge Script
+3. Check browser console for video loading errors
+
+## 🎯 Success Criteria
+- [ ] Frontend loads at `https://ishanime.vercel.app`
+- [ ] API responds at `https://ishanime-api-pzssf.bunny.run/api/anime`
+- [ ] Anime list displays correctly
+- [ ] Videos play without errors
+- [ ] No console errors
+- [ ] No Railway dependencies
+
+## 🚀 Final Result
+Your complete anime streaming platform will be:
+- **Frontend**: Vercel (fast, global CDN)
+- **Backend**: Bunny Edge Scripting (serverless, fast)
+- **Storage**: Bunny CDN (videos and thumbnails)
+- **Deployment**: Automatic on every push
+- **Cost**: Much cheaper than Railway
