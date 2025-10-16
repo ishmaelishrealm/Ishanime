@@ -11,9 +11,15 @@ app.use(cors());
 app.use(express.json());
 
 // Bunny CDN Configuration
-const BUNNY_API_KEY = process.env.BUNNY_API_KEY;
-const LIBRARY_ID = process.env.LIBRARY_ID;
-const DELIVERY_DOMAIN = process.env.DELIVERY_DOMAIN;
+const BUNNY_API_KEY = process.env.BUNNY_API_KEY || '7f0a1d07-a8a4-4e07-af7ed42722ee-bfbd-4896';
+const LIBRARY_ID = process.env.LIBRARY_ID || '506159';
+const DELIVERY_DOMAIN = process.env.DELIVERY_DOMAIN || 'vz-a01fffb9-e7a.b-cdn.net';
+
+// Log configuration status
+console.log('🔧 Bunny CDN Configuration:');
+console.log('📡 API Key:', BUNNY_API_KEY ? '✅ Set' : '❌ Missing');
+console.log('📚 Library ID:', LIBRARY_ID ? '✅ Set' : '❌ Missing');
+console.log('🌐 Delivery Domain:', DELIVERY_DOMAIN ? '✅ Set' : '❌ Missing');
 
 // Cache for anime data
 let animeCache = null;
@@ -129,7 +135,12 @@ app.get('/api/health', (req, res) => {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         service: 'Ishanime Backend API',
-        version: '1.0.0'
+        version: '1.0.0',
+        bunny_cdn: {
+            api_key: BUNNY_API_KEY ? 'configured' : 'missing',
+            library_id: LIBRARY_ID || 'missing',
+            delivery_domain: DELIVERY_DOMAIN || 'missing'
+        }
     });
 });
 
@@ -178,10 +189,23 @@ app.use('*', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🌐 Health check: http://localhost:${PORT}/api/health`);
     console.log(`📺 Anime API: http://localhost:${PORT}/api/anime`);
+    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📡 Bunny CDN configured: ${BUNNY_API_KEY ? 'Yes' : 'No'}`);
+});
+
+// Handle server errors
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
 });
 
 module.exports = app;
