@@ -1,38 +1,43 @@
 
-name: Deploy Ishrealmanime
+name: 🚀 Deploy to Bunny Edge Script + Vercel
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
-  deploy-bunny-script:
+  deploy:
     runs-on: ubuntu-latest
-    name: Deploy Bunny Edge Scripting
 
     steps:
-      - name: Checkout repository
+      - name: 🧩 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy to Bunny Edge Script
-        uses: bunny-net/edge-scripting-action@v1
-        with:
-          script: ${{ secrets.BUNNY_SCRIPT_ID }}
-          api_key: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
-          source: .
+      - name: 🔍 Verify required frontend files
+        run: |
+          echo "Checking required files..."
+          for f in index.html script.js styles.css; do
+            if [ ! -f "$f" ]; then
+              echo "❌ Missing $f"
+              exit 1
+            fi
+          done
+          echo "✅ All required files are present."
 
-  deploy-frontend:
-    runs-on: ubuntu-latest
-    name: Deploy Frontend to Vercel
-    needs: deploy-bunny-script
+      - name: 🦋 Deploy to Bunny Edge Script
+        env:
+          BUNNY_SCRIPT_ID: ${{ secrets.BUNNY_SCRIPT_ID }}
+          BUNNY_DEPLOYMENT_KEY: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
+        run: |
+          echo "🚀 Deploying to Bunny Edge Script..."
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "AccessKey: $BUNNY_DEPLOYMENT_KEY" \
+            "https://api.bunny.net/edge/script/${BUNNY_SCRIPT_ID}/deploy"
+          echo "✅ Bunny Edge Script deployed."
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy to Vercel
+      - name: ▲ Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
