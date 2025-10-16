@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = null; // Static mode - no backend connection
+const API_URL = ''; // Use Vercel API proxy to Railway backend
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -45,20 +45,7 @@ function setupEventListeners() {
 async function checkBackendStatus() {
     const statusElement = document.getElementById('backendStatus');
     
-    if (!API_URL) {
-        // Static mode - show demo mode message
-        statusElement.innerHTML = `
-            <div class="status-content">
-                <div class="status-icon">🎭</div>
-                <p>Demo Mode - Static anime streaming site</p>
-            </div>
-        `;
-        // Hide status after 3 seconds
-        setTimeout(() => {
-            statusElement.style.display = 'none';
-        }, 3000);
-        return;
-    }
+    // Always try to connect to backend via API proxy
     
     try {
         const response = await fetch(`${API_URL}/api/health`);
@@ -139,13 +126,7 @@ function updateSiteBranding(config) {
 async function loadAnime() {
     showLoading();
     
-    if (!API_URL) {
-        // Static mode - load demo data directly
-        console.log('🎭 Static mode - loading demo anime data...');
-        loadDemoAnime();
-        hideLoading();
-        return;
-    }
+    // Always try to load from backend via API proxy
     
     try {
         console.log('🔄 Fetching anime from backend...');

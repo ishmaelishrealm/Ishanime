@@ -21,6 +21,12 @@
       "src": "public/**/*",
       "use": "@vercel/static"
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://ishanime-production.up.railway.app/api/$1"
+    }
   ]
 }
 
