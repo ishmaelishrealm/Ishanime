@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = ''; // Use Vercel API proxy to Railway backend
+const API_URL = 'https://ishanime-production.up.railway.app'; // Direct Railway backend connection
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -48,9 +48,14 @@ async function checkBackendStatus() {
     // Always try to connect to backend via API proxy
     
     try {
+        console.log('🔍 Testing backend connection...');
+        console.log('🌐 Health check URL:', `${API_URL}/api/health`);
         const response = await fetch(`${API_URL}/api/health`);
+        console.log('📡 Health check status:', response.status);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('✅ Backend health data:', data);
             statusElement.innerHTML = `
                 <div class="status-content">
                     <div class="status-icon">✅</div>
@@ -62,10 +67,12 @@ async function checkBackendStatus() {
                 statusElement.style.display = 'none';
             }, 3000);
         } else {
+            console.log('❌ Health check failed with status:', response.status);
             showBackendError();
         }
     } catch (error) {
-        console.error('Backend connection failed:', error);
+        console.error('❌ Backend connection failed:', error);
+        console.error('❌ Connection error details:', error.message);
         showBackendError();
     }
 }
@@ -130,8 +137,10 @@ async function loadAnime() {
     
     try {
         console.log('🔄 Fetching anime from backend...');
+        console.log('🌐 API URL:', API_URL);
         const response = await fetch(`${API_URL}/api/anime`);
         console.log('📡 Backend response status:', response.status);
+        console.log('📡 Backend response headers:', response.headers);
         
         if (response.ok) {
             const data = await response.json();
@@ -151,6 +160,8 @@ async function loadAnime() {
         }
     } catch (error) {
         console.error('❌ Failed to load anime:', error);
+        console.error('❌ Error details:', error.message);
+        console.error('❌ Error stack:', error.stack);
         loadDemoAnime();
     } finally {
         hideLoading();
