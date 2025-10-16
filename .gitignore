@@ -1,0 +1,44 @@
+# Node.js
+node_modules/
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build tools
+vite.config.*
+tailwind.config.*
+postcss.config.*
+tsconfig.json
+tsconfig.node.json
+
+# React/Vue/Angular
+src/
+*.tsx
+*.ts
+components/
+figma/
+ui/
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary
+tmp/
+temp/
+*.tmp
+*.temp
