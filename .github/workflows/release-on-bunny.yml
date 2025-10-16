@@ -1,5 +1,5 @@
 
-name: Release on Bunny
+name: Deploy Ishrealmanime
 
 on:
   push:
@@ -8,8 +8,9 @@ on:
       - master
 
 jobs:
-  deploy:
+  deploy-bunny-script:
     runs-on: ubuntu-latest
+    name: Deploy Bunny Edge Scripting
 
     steps:
       - name: Checkout repository
@@ -21,3 +22,20 @@ jobs:
           script: ${{ secrets.BUNNY_SCRIPT_ID }}
           api_key: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
           source: .
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    name: Deploy Frontend to Vercel
+    needs: deploy-bunny-script
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
