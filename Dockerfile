@@ -4,12 +4,14 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy server files
-COPY server/ ./server/
+# Copy package.json first for better caching
+COPY server/package.json ./
 
 # Install dependencies
-WORKDIR /app/server
 RUN npm install
+
+# Copy the rest of the server files
+COPY server/ ./
 
 # Expose port
 EXPOSE 3000
