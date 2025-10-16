@@ -1,5 +1,6 @@
 // Bunny Edge Scripting - Standalone Script for Ishrealmanime
 // This replaces the Railway Node.js backend entirely
+// Deployed via GitHub Actions
 
 // Configuration - Set these in Bunny Edge Scripting dashboard
 const BUNNY_API_KEY = '7f0a1d07-a8a4-4e07-af7ed42722ee-bfbd-4896'; // Your Bunny API key
