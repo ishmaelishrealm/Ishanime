@@ -1,7 +1,0 @@
-{
-  "entry": "bunny-edge-script.js",
-  "type": "standalone",
-  "memory": 128,
-  "timeout": 15,
-  "regions": ["GLOBAL"]
-}

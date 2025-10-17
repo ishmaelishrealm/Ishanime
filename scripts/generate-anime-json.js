@@ -1,14 +1,14 @@
-// Vercel Serverless Function for Ishrealmanime
-// Replaces Bunny Edge Script with a simpler, more reliable solution
+#!/usr/bin/env node
+// Generate static anime.json from Bunny Video Library
+// This script fetches all videos and creates a static JSON file for the frontend
 
+const fs = require('fs');
+const path = require('path');
+
+// BunnyCDN Configuration
 const BUNNY_API_KEY = '7f0a1d07-a8a4-4e07-af7ed42722ee-bfbd-4896';
 const LIBRARY_ID = '506159';
 const DELIVERY_DOMAIN = 'vz-a01fffb9-e7a.b-cdn.net';
-
-// In-memory cache for performance
-let animeCache = null;
-let cacheTimestamp = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Helper function to create URL-friendly slugs
 function slugify(text) {
@@ -22,6 +22,8 @@ function slugify(text) {
 // Fetch videos from Bunny Video Library
 async function fetchVideos() {
     try {
+        console.log('🔄 Fetching videos from Bunny Video Library...');
+        
         const response = await fetch(`https://video.bunnycdn.com/library/${LIBRARY_ID}/videos`, {
             headers: { 
                 'AccessKey': BUNNY_API_KEY, 
@@ -30,19 +32,22 @@ async function fetchVideos() {
         });
 
         if (!response.ok) {
-            throw new Error(`Bunny API error: ${response.status}`);
+            throw new Error(`Bunny API error: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log(`✅ Fetched ${data.items?.length || 0} videos from Bunny`);
         return data.items || [];
     } catch (error) {
-        console.error('Error fetching videos from Bunny:', error);
+        console.error('❌ Error fetching videos:', error);
         throw error;
     }
 }
 
 // Parse video data into organized anime shows and episodes
 function parseAnimeData(videos) {
+    console.log('🔄 Parsing video data into anime shows...');
+    
     const animeMap = new Map();
 
     videos.forEach(video => {
@@ -85,49 +90,62 @@ function parseAnimeData(videos) {
         anime.episodes.sort((a, b) => parseInt(a.episode) - parseInt(b.episode));
     });
 
-    return Array.from(animeMap.values());
+    const animeList = Array.from(animeMap.values());
+    console.log(`✅ Parsed ${animeList.length} anime shows with ${videos.length} total episodes`);
+    
+    return animeList;
 }
 
-// Main Vercel serverless function handler
-export default async function handler(req, res) {
-    // Set CORS headers for cross-origin requests
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+// Generate the final JSON structure
+function generateAnimeJson(animeData) {
+    return {
+        success: true,
+        data: animeData,
+        count: animeData.length,
+        timestamp: new Date().toISOString(),
+        generated: true,
+        source: 'BunnyCDN Video Library',
+        version: '1.0.0'
+    };
+}
 
-    // Handle preflight OPTIONS requests
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
+// Main function
+async function main() {
     try {
-        const now = Date.now();
+        console.log('🚀 Starting anime.json generation...');
         
-        // Use cache if it's still valid
-        if (!animeCache || (now - cacheTimestamp) > CACHE_DURATION) {
-            console.log('Fetching fresh anime data from Bunny...');
-            const videos = await fetchVideos();
-            animeCache = parseAnimeData(videos);
-            cacheTimestamp = now;
-        } else {
-            console.log('Using cached anime data');
+        // Fetch videos from Bunny
+        const videos = await fetchVideos();
+        
+        if (videos.length === 0) {
+            console.log('⚠️ No videos found in Bunny Video Library');
+            return;
         }
-
-        // Return successful response with anime data
-        res.status(200).json({
-            success: true,
-            data: animeCache,
-            count: animeCache.length,
-            timestamp: new Date().toISOString(),
-            cached: (now - cacheTimestamp) < CACHE_DURATION
-        });
-
+        
+        // Parse into anime data
+        const animeData = parseAnimeData(videos);
+        
+        // Generate final JSON
+        const animeJson = generateAnimeJson(animeData);
+        
+        // Write to frontend directory
+        const outputPath = path.join(__dirname, '..', 'frontend', 'anime.json');
+        fs.writeFileSync(outputPath, JSON.stringify(animeJson, null, 2));
+        
+        console.log(`✅ Successfully generated anime.json with ${animeData.length} anime shows`);
+        console.log(`📁 Output: ${outputPath}`);
+        console.log(`📊 Total episodes: ${videos.length}`);
+        console.log(`🕒 Generated at: ${animeJson.timestamp}`);
+        
     } catch (error) {
-        console.error('Serverless function error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal Server Error',
-            message: error.message
-        });
+        console.error('❌ Failed to generate anime.json:', error);
+        process.exit(1);
     }
 }
+
+// Run the script
+if (require.main === module) {
+    main();
+}
+
+module.exports = { fetchVideos, parseAnimeData, generateAnimeJson };

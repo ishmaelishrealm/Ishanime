@@ -1,7 +1,7 @@
 // Configuration
-// 🚀 Using Vercel Serverless Functions - Much simpler and more reliable!
-// No more Bunny Edge Script loops, DNS issues, or deployment complexity
-const API_URL = ''; // ✅ Using same domain - Vercel handles everything
+// 🚀 Using Static JSON - Fastest, most reliable approach!
+// Pre-generated anime.json updated every 5 minutes via GitHub Actions
+const ANIME_JSON_URL = '/anime.json'; // ✅ Static JSON file
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -48,18 +48,18 @@ async function checkBackendStatus() {
     const statusElement = document.getElementById('backendStatus');
     
     try {
-        console.log('🔍 Testing Vercel API connection...');
-        console.log('🌐 Health check URL:', '/api/health');
-        const response = await fetch('/api/health');
-        console.log('📡 Health check status:', response.status);
+        console.log('🔍 Testing static JSON availability...');
+        console.log('🌐 JSON URL:', ANIME_JSON_URL);
+        const response = await fetch(ANIME_JSON_URL);
+        console.log('📡 JSON response status:', response.status);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('✅ Vercel API health data:', data);
+            console.log('✅ Static JSON loaded:', data);
             statusElement.innerHTML = `
                 <div class="status-content">
                     <div class="status-icon">✅</div>
-                    <p>Connected to Vercel API - Loading real anime content...</p>
+                    <p>Static JSON loaded - ${data.count || 0} anime shows available</p>
                 </div>
             `;
             // Hide status after 3 seconds
@@ -67,12 +67,12 @@ async function checkBackendStatus() {
                 statusElement.style.display = 'none';
             }, 3000);
         } else {
-            console.log('❌ Health check failed with status:', response.status);
+            console.log('❌ JSON load failed with status:', response.status);
             showBackendError();
         }
     } catch (error) {
-        console.error('❌ Vercel API connection failed:', error);
-        console.error('❌ Connection error details:', error.message);
+        console.error('❌ Static JSON load failed:', error);
+        console.error('❌ Error details:', error.message);
         showBackendError();
     }
 }
@@ -83,7 +83,7 @@ function showBackendError() {
     statusElement.innerHTML = `
         <div class="status-content">
             <div class="status-icon">⚠️</div>
-            <p>Vercel API not connected - Using demo mode</p>
+            <p>Static JSON not available - Using demo mode</p>
             <p style="font-size: 0.8em; margin-top: 5px; opacity: 0.7;">
                 Check console (F12) for connection details
             </p>
@@ -91,19 +91,24 @@ function showBackendError() {
     `;
 }
 
-// Load site configuration from backend
+// Load site configuration (static for now)
 async function loadSiteConfig() {
-    try {
-        const response = await fetch('/api/site');
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.data) {
-                updateSiteBranding(data.data);
-            }
+    // Static site configuration - no API call needed
+    const config = {
+        name: 'Ishrealmanime',
+        description: 'Your ultimate anime streaming destination',
+        domain: 'ishanime.me',
+        version: '1.0.0',
+        features: {
+            multipleVideoQualities: true,
+            adaptiveStreaming: true,
+            thumbnailPreviews: true,
+            episodeOrdering: 'oldest-first',
+            staticJson: true,
+            autoUpdate: '5 minutes'
         }
-    } catch (error) {
-        console.error('Failed to load site config:', error);
-    }
+    };
+    updateSiteBranding(config);
 }
 
 // Update site branding from backend
@@ -132,37 +137,36 @@ function updateSiteBranding(config) {
     console.log('🎨 Site branding updated from backend:', config);
 }
 
-// Load anime from backend
+// Load anime from static JSON
 async function loadAnime() {
     showLoading();
     
     try {
-        console.log('🔄 Fetching anime from Vercel API...');
-        console.log('🌐 API URL:', '/api/anime');
-        const response = await fetch('/api/anime');
-        console.log('📡 Vercel API response status:', response.status);
-        console.log('📡 Vercel API response headers:', response.headers);
+        console.log('🔄 Loading anime from static JSON...');
+        console.log('🌐 JSON URL:', ANIME_JSON_URL);
+        const response = await fetch(ANIME_JSON_URL);
+        console.log('📡 JSON response status:', response.status);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('📊 Vercel API response data:', data);
+            console.log('📊 JSON response data:', data);
             
             if (data.success && data.data && data.data.length > 0) {
                 animeData = data.data;
-                console.log(`✅ Loaded ${animeData.length} anime shows from Vercel API`);
+                console.log(`✅ Loaded ${animeData.length} anime shows from static JSON`);
+                console.log(`🕒 Last updated: ${data.timestamp}`);
                 displayAnime(animeData);
             } else {
-                console.log('⚠️ No anime data from Vercel API, using demo data');
+                console.log('⚠️ No anime data in JSON, using demo data');
                 loadDemoAnime();
             }
         } else {
-            console.log('❌ Vercel API request failed, using demo data');
+            console.log('❌ JSON request failed, using demo data');
             loadDemoAnime();
         }
     } catch (error) {
-        console.error('❌ Failed to load anime from Vercel API:', error);
+        console.error('❌ Failed to load anime from static JSON:', error);
         console.error('❌ Error details:', error.message);
-        console.error('❌ Error stack:', error.stack);
         
         // Show user-friendly error message
         const statusElement = document.getElementById('backendStatus');
@@ -170,8 +174,8 @@ async function loadAnime() {
             statusElement.innerHTML = `
                 <div class="status-content">
                     <div class="status-icon">❌</div>
-                    <p>Vercel API connection failed: ${error.message}</p>
-                    <p>Check if serverless functions are deployed</p>
+                    <p>Static JSON load failed: ${error.message}</p>
+                    <p>Check if anime.json exists and is accessible</p>
                 </div>
             `;
             statusElement.style.display = 'block';

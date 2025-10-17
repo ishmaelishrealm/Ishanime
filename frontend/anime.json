@@ -1,0 +1,44 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "demon-slayer",
+      "name": "Demon Slayer",
+      "title": "Demon Slayer",
+      "slug": "demon-slayer",
+      "episodes": [
+        {
+          "id": "88a8c13d-4f20-4bec-a2f2-a68294127cd8",
+          "episode": "01",
+          "title": "Demon Slayer - Episode 01",
+          "videoUrl": "https://iframe.mediadelivery.net/play/506159/88a8c13d-4f20-4bec-a2f2-a68294127cd8",
+          "directMp4": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/play_720p.mp4",
+          "directMp4_480p": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/play_480p.mp4",
+          "directMp4_1080p": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/play_1080p.mp4",
+          "hlsUrl": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/playlist.m3u8",
+          "thumbnail": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/thumbnail.jpg",
+          "thumbnailPreview": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/preview.jpg",
+          "uploadedAt": "2025-10-11T10:37:40.278"
+        },
+        {
+          "id": "e560c0c0-5b23-4f0c-8192-76e23e560c4b",
+          "episode": "02",
+          "title": "Demon Slayer - Episode 02",
+          "videoUrl": "https://iframe.mediadelivery.net/play/506159/e560c0c0-5b23-4f0c-8192-76e23e560c4b",
+          "directMp4": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/play_720p.mp4",
+          "directMp4_480p": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/play_480p.mp4",
+          "directMp4_1080p": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/play_1080p.mp4",
+          "hlsUrl": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/playlist.m3u8",
+          "thumbnail": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/thumbnail.jpg",
+          "thumbnailPreview": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/preview.jpg",
+          "uploadedAt": "2025-10-11T10:37:49.47"
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "timestamp": "2025-10-17T08:17:47.401Z",
+  "generated": true,
+  "source": "BunnyCDN Video Library",
+  "version": "1.0.0"
+}
