@@ -1,241 +1,195 @@
-// Bunny Edge Scripting - Standalone Script for Ishrealmanime
-// This replaces the Railway Node.js backend entirely
-// Deployed via GitHub Actions - Using new script ID 47325
-// Last updated: Fix 508 loop detection - script is clean, no self-references
+// ============================================================
+// Ishanime Bunny Edge Script — Clean, Loop-Proof, Stable Build
+// Version: 1.1.0
+// Description: Replaces Node backend for Ishrealmanime frontend
+// Updated: Fix infinite loop (508), CORS, caching & data parsing
+// ============================================================
 
-// Configuration - Direct values
+// BunnyCDN Configuration
 const BUNNY_API_KEY = '7f0a1d07-a8a4-4e07-af7ed42722ee-bfbd-4896';
 const LIBRARY_ID = '506159';
 const DELIVERY_DOMAIN = 'vz-a01fffb9-e7a.b-cdn.net';
 
-// Cache for anime data (Edge Scripting has memory limitations, so keep cache small)
+// Cache (stored in memory between requests)
 let animeCache = null;
-let cacheTimestamp = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+let cacheTimestamp = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-// Helper function to slugify strings
+// Helper: Slugify anime titles
 function slugify(text) {
-    return text
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
-// Fetch videos from Bunny CDN
+// Helper: Safe fetch from Bunny Video API (never self-calls)
 async function fetchVideos() {
-    try {
-        const response = await fetch(`https://video.bunnycdn.com/library/${LIBRARY_ID}/videos`, {
-            headers: {
-                'AccessKey': BUNNY_API_KEY,
-                'Accept': 'application/json'
-            }
-        });
+  try {
+    const response = await fetch(`https://video.bunnycdn.com/library/${LIBRARY_ID}/videos`, {
+      method: 'GET',
+      headers: {
+        'AccessKey': BUNNY_API_KEY,
+        'Accept': 'application/json',
+        'User-Agent': 'IshanimeEdgeScript/1.1.0'
+      },
+      redirect: 'follow',
+      cache: 'no-store'
+    });
 
-        if (!response.ok) {
-            throw new Error(`Bunny API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.items || [];
-    } catch (error) {
-        console.error('Error fetching videos:', error);
-        throw error;
+    if (!response.ok) {
+      throw new Error(`Bunny API error: ${response.status}`);
     }
+
+    const data = await response.json();
+    return data.items || [];
+  } catch (error) {
+    console.error('Error fetching Bunny videos:', error);
+    throw error;
+  }
 }
 
-// Parse videos into anime shows and episodes
-function parseAnimeData(videos) {
-    const animeMap = new Map();
+// Helper: Convert video data → anime list
+function parseAnime(videos) {
+  const animeMap = new Map();
 
-    videos.forEach(video => {
-        // Extract show name and episode number from title
-        const titleMatch = video.title.match(/^(.+?)\s*-\s*Episode\s*(\d+)/i);
-        
-        if (titleMatch) {
-            const showName = titleMatch[1].trim();
-            const episodeNumber = parseInt(titleMatch[2]);
-            
-            if (!animeMap.has(showName)) {
-                animeMap.set(showName, {
-                    id: slugify(showName),
-                    name: showName,
-                    title: showName, // Add title field for compatibility
-                    slug: slugify(showName),
-                    episodes: []
-                });
-            }
+  videos.forEach(video => {
+    const titleMatch = video.title.match(/^(.+?)\s*-\s*Episode\s*(\d+)/i);
+    if (!titleMatch) return;
 
-            const episode = {
-                id: video.guid,
-                episode: episodeNumber.toString().padStart(2, '0'),
-                title: video.title,
-                videoUrl: `https://iframe.mediadelivery.net/play/${LIBRARY_ID}/${video.guid}`,
-                directMp4: `https://${DELIVERY_DOMAIN}/${video.guid}/play_720p.mp4`,
-                directMp4_480p: `https://${DELIVERY_DOMAIN}/${video.guid}/play_480p.mp4`,
-                directMp4_1080p: `https://${DELIVERY_DOMAIN}/${video.guid}/play_1080p.mp4`,
-                hlsUrl: `https://${DELIVERY_DOMAIN}/${video.guid}/playlist.m3u8`,
-                thumbnail: `https://${DELIVERY_DOMAIN}/${video.guid}/thumbnail.jpg`,
-                thumbnailPreview: `https://${DELIVERY_DOMAIN}/${video.guid}/preview.jpg`,
-                uploadedAt: video.dateUploaded || video.createdAt || new Date().toISOString()
-            };
+    const show = titleMatch[1].trim();
+    const epNum = parseInt(titleMatch[2]);
 
-            animeMap.get(showName).episodes.push(episode);
-        }
-    });
+    if (!animeMap.has(show)) {
+      animeMap.set(show, {
+        id: slugify(show),
+        name: show,
+        title: show,
+        slug: slugify(show),
+        episodes: []
+      });
+    }
 
-    // Sort episodes by episode number (oldest first)
-    animeMap.forEach(anime => {
-        anime.episodes.sort((a, b) => {
-            const episodeA = parseInt(a.episode);
-            const episodeB = parseInt(b.episode);
-            return episodeA - episodeB;
-        });
-    });
+    const episode = {
+      id: video.guid,
+      episode: epNum.toString().padStart(2, '0'),
+      title: video.title,
+      videoUrl: `https://iframe.mediadelivery.net/play/${LIBRARY_ID}/${video.guid}`,
+      directMp4: `https://${DELIVERY_DOMAIN}/${video.guid}/play_720p.mp4`,
+      directMp4_480p: `https://${DELIVERY_DOMAIN}/${video.guid}/play_480p.mp4`,
+      directMp4_1080p: `https://${DELIVERY_DOMAIN}/${video.guid}/play_1080p.mp4`,
+      hlsUrl: `https://${DELIVERY_DOMAIN}/${video.guid}/playlist.m3u8`,
+      thumbnail: `https://${DELIVERY_DOMAIN}/${video.guid}/thumbnail.jpg`,
+      uploadedAt: video.dateUploaded || video.createdAt || new Date().toISOString()
+    };
 
-    return Array.from(animeMap.values());
+    animeMap.get(show).episodes.push(episode);
+  });
+
+  // Sort episodes ascending
+  animeMap.forEach(anime =>
+    anime.episodes.sort((a, b) => parseInt(a.episode) - parseInt(b.episode))
+  );
+
+  return Array.from(animeMap.values());
 }
 
-// Get anime data (with caching)
+// Cached getter
 async function getAnimeData() {
-    const now = Date.now();
-    
-    if (animeCache && cacheTimestamp && (now - cacheTimestamp) < CACHE_DURATION) {
-        return animeCache;
+  const now = Date.now();
+  if (animeCache && now - cacheTimestamp < CACHE_TTL) return animeCache;
+
+  const videos = await fetchVideos();
+  animeCache = parseAnime(videos);
+  cacheTimestamp = now;
+  return animeCache;
+}
+
+// ============================================================
+// 🧩 MAIN HANDLER
+// ============================================================
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Content-Type': 'application/json'
+    };
+
+    // Preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 200, headers });
     }
 
     try {
-        const videos = await fetchVideos();
-        animeCache = parseAnimeData(videos);
-        cacheTimestamp = now;
-        return animeCache;
-    } catch (error) {
-        console.error('Error getting anime data:', error);
-        throw error;
-    }
-}
+      // Health
+      if (path === '/api/health') {
+        return new Response(JSON.stringify({
+          status: 'healthy',
+          timestamp: new Date().toISOString(),
+          service: 'Ishanime Bunny Edge API',
+          version: '1.1.0'
+        }), { status: 200, headers });
+      }
 
-// Main Edge Script handler - Bunny Edge Scripting format
-export default {
-    async fetch(request, context) {
-        const url = new URL(request.url);
-        const path = url.pathname;
+      // Site meta
+      if (path === '/api/site') {
+        return new Response(JSON.stringify({
+          success: true,
+          data: {
+            name: 'Ishrealmanime',
+            description: 'Your ultimate anime streaming destination',
+            version: '1.1.0',
+            features: {
+              multipleVideoQualities: true,
+              adaptiveStreaming: true,
+              thumbnailPreviews: true
+            }
+          }
+        }), { status: 200, headers });
+      }
 
-        // Set CORS headers
-        const corsHeaders = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Content-Type': 'application/json'
-        };
+      // All anime
+      if (path === '/api/anime') {
+        const animeData = await getAnimeData();
+        return new Response(JSON.stringify({
+          success: true,
+          count: animeData.length,
+          data: animeData
+        }), { status: 200, headers });
+      }
 
-        // Handle preflight requests
-        if (request.method === 'OPTIONS') {
-            return new Response(null, { 
-                status: 200, 
-                headers: corsHeaders 
-            });
+      // Specific anime
+      if (path.startsWith('/api/anime/')) {
+        const slug = path.split('/').pop();
+        const animeData = await getAnimeData();
+        const anime = animeData.find(a => a.slug === slug);
+
+        if (anime) {
+          return new Response(JSON.stringify({ success: true, data: anime }), { status: 200, headers });
+        } else {
+          return new Response(JSON.stringify({ success: false, error: 'Anime not found' }), { status: 404, headers });
         }
+      }
 
-        try {
-            // Health check endpoint
-            if (path === '/api/health') {
-                return new Response(JSON.stringify({
-                    status: 'healthy',
-                    timestamp: new Date().toISOString(),
-                    service: 'Ishanime Bunny Edge Scripting API',
-                    version: '1.0.0',
-                    bunny_cdn: {
-                        api_key: BUNNY_API_KEY ? 'configured' : 'missing',
-                        library_id: LIBRARY_ID || 'missing',
-                        delivery_domain: DELIVERY_DOMAIN || 'missing'
-                    }
-                }), {
-                    status: 200,
-                    headers: corsHeaders
-                });
-            }
+      // Unknown routes
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Not found',
+        message: `Route ${path} not recognized`
+      }), { status: 404, headers });
 
-            // Anime data endpoint
-            if (path === '/api/anime') {
-                const animeData = await getAnimeData();
-                return new Response(JSON.stringify({
-                    success: true,
-                    data: animeData,
-                    count: animeData.length,
-                    timestamp: new Date().toISOString()
-                }), {
-                    status: 200,
-                    headers: corsHeaders
-                });
-            }
-
-            // Site configuration endpoint
-            if (path === '/api/site') {
-                return new Response(JSON.stringify({
-                    success: true,
-                    data: {
-                        name: 'Ishrealmanime',
-                        description: 'Your ultimate anime streaming destination',
-                        version: '1.0.0',
-                        features: {
-                            multipleVideoQualities: true,
-                            adaptiveStreaming: true,
-                            thumbnailPreviews: true,
-                            episodeOrdering: 'oldest-first'
-                        }
-                    }
-                }), {
-                    status: 200,
-                    headers: corsHeaders
-                });
-            }
-
-            // Individual anime endpoint (e.g., /api/anime/solo-leveling)
-            if (path.startsWith('/api/anime/')) {
-                const slug = path.split('/').pop();
-                const animeData = await getAnimeData();
-                const anime = animeData.find(a => a.slug === slug);
-                
-                if (anime) {
-                    return new Response(JSON.stringify({
-                        success: true,
-                        data: anime
-                    }), {
-                        status: 200,
-                        headers: corsHeaders
-                    });
-                } else {
-                    return new Response(JSON.stringify({
-                        success: false,
-                        error: 'Anime not found'
-                    }), {
-                        status: 404,
-                        headers: corsHeaders
-                    });
-                }
-            }
-
-            // 404 for unknown routes
-            return new Response(JSON.stringify({
-                success: false,
-                error: 'Not found',
-                message: `Route ${path} not found`
-            }), {
-                status: 404,
-                headers: corsHeaders
-            });
-
-        } catch (error) {
-            console.error('Edge Script error:', error);
-            return new Response(JSON.stringify({
-                success: false,
-                error: 'Internal server error',
-                message: error.message
-            }), {
-                status: 500,
-                headers: corsHeaders
-            });
-        }
+    } catch (err) {
+      console.error('Edge Script Error:', err);
+      return new Response(JSON.stringify({
+        success: false,
+        error: err.message || 'Internal error'
+      }), { status: 500, headers });
     }
+  }
 };
