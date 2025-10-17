@@ -19,25 +19,43 @@ function slugify(text) {
         .replace(/^-+|-+$/g, '');
 }
 
-// Fetch videos from Bunny Video Library
+// Fetch all videos from Bunny Video Library with pagination support
 async function fetchVideos() {
     try {
-        console.log('🔄 Fetching videos from Bunny Video Library...');
-        
-        const response = await fetch(`https://video.bunnycdn.com/library/${LIBRARY_ID}/videos`, {
-            headers: { 
-                'AccessKey': BUNNY_API_KEY, 
-                'Accept': 'application/json' 
-            }
-        });
+        console.log('🔄 Fetching videos from Bunny Video Library (with pagination)...');
 
-        if (!response.ok) {
-            throw new Error(`Bunny API error: ${response.status} ${response.statusText}`);
+        const allItems = [];
+        let page = 1;
+        const perPage = 100; // Bunny API typically supports perPage up to 100
+
+        // Keep fetching until an empty page is returned
+        // API format assumption: /videos?page=X&perPage=Y
+        for (;;) {
+            const url = `https://video.bunnycdn.com/library/${LIBRARY_ID}/videos?page=${page}&perPage=${perPage}`;
+            const response = await fetch(url, {
+                headers: {
+                    'AccessKey': BUNNY_API_KEY,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Bunny API error: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            const items = data.items || [];
+            console.log(`📄 Page ${page}: ${items.length} items`);
+            allItems.push(...items);
+
+            if (items.length < perPage) {
+                break; // last page
+            }
+            page += 1;
         }
 
-        const data = await response.json();
-        console.log(`✅ Fetched ${data.items?.length || 0} videos from Bunny`);
-        return data.items || [];
+        console.log(`✅ Total fetched videos: ${allItems.length}`);
+        return allItems;
     } catch (error) {
         console.error('❌ Error fetching videos:', error);
         throw error;
@@ -51,14 +69,37 @@ function parseAnimeData(videos) {
     const animeMap = new Map();
 
     videos.forEach(video => {
-        // Extract show name and episode number from title
-        const titleMatch = video.title.match(/^(.+?)\s*-\s*Episode\s*(\d+)/i);
-        if (!titleMatch) return;
+        const title = (video.title || '').trim();
+        let showName = '';
+        let episodeNumber = null;
 
-        const showName = titleMatch[1].trim();
-        const episodeNumber = parseInt(titleMatch[2]);
+        // Robust title parsing supporting multiple formats
+        const patterns = [
+            /^(.+?)\s*-\s*Episode\s*(\d+)/i,           // Show - Episode 12
+            /^(.+?)\s*-\s*Ep\.?\s*(\d+)/i,            // Show - Ep 12 or Ep. 12
+            /^(.+?)\s+Ep\.?\s*(\d+)/i,                 // Show Ep 12
+            /^(.+?)\s*S(\d+)\s*E(\d+)/i,               // Show S01 E12
+            /^(.+?)\s*Season\s*\d+\s*Episode\s*(\d+)/i, // Show Season 1 Episode 12
+            /^(.+?)\s*-\s*(\d{1,3})$/i                  // Show - 12
+        ];
 
-        // Create anime show entry if it doesn't exist
+        for (const re of patterns) {
+            const m = title.match(re);
+            if (m) {
+                showName = m[1].trim();
+                // If SxxExx pattern, episode is group 3; otherwise group 2
+                episodeNumber = parseInt(m[3] || m[2], 10);
+                break;
+            }
+        }
+
+        // Fallbacks if patterns didn't match
+        if (!showName) {
+            // Use part before the first dash as show name, or entire title
+            const dashIdx = title.indexOf('-');
+            showName = (dashIdx > 0 ? title.substring(0, dashIdx) : title).trim();
+        }
+
         if (!animeMap.has(showName)) {
             animeMap.set(showName, {
                 id: slugify(showName),
@@ -69,11 +110,17 @@ function parseAnimeData(videos) {
             });
         }
 
+        // Determine episode number if still missing
+        if (episodeNumber == null || Number.isNaN(episodeNumber)) {
+            // Use sequential order within the show as a last resort
+            episodeNumber = animeMap.get(showName).episodes.length + 1;
+        }
+
         // Add episode to the show with correct CDN URLs
         animeMap.get(showName).episodes.push({
             id: video.guid,
             episode: episodeNumber.toString().padStart(2, '0'),
-            title: video.title,
+            title: title,
             // Bunny iframe embed URL (most reliable for playback)
             videoUrl: `https://iframe.mediadelivery.net/play/${LIBRARY_ID}/${video.guid}`,
             // Direct MP4 URLs for different qualities
