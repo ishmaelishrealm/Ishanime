@@ -83,6 +83,8 @@ async function checkBackendStatus() {
     } catch (error) {
         console.error('❌ Backend connection failed:', error);
         console.error('❌ Connection error details:', error.message);
+        console.error('❌ API URL being used:', API_URL);
+        console.error('❌ Full health check URL:', `${API_URL}/api/health`);
         showBackendError();
     }
 }
@@ -94,6 +96,9 @@ function showBackendError() {
         <div class="status-content">
             <div class="status-icon">⚠️</div>
             <p>Backend not connected - Using demo mode</p>
+            <p style="font-size: 0.8em; margin-top: 5px; opacity: 0.7;">
+                Check console (F12) for connection details
+            </p>
         </div>
     `;
 }
