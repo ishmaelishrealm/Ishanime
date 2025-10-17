@@ -1,10 +1,10 @@
 # 🌐 Custom Domain Setup for Bunny Edge Scripting
 
-## 🎯 **Goal**: Connect `api.ishanime.com` to your Bunny Edge Script
+## 🎯 **Goal**: Connect `api.ishanime.me` to your Bunny Edge Script
 
 ### Current Setup:
 - **Backend URL**: `https://ishanime-api-pzssf.bunny.run`
-- **Target**: `https://api.ishanime.com`
+- **Target**: `https://api.ishanime.me`
 
 ---
 
@@ -13,7 +13,7 @@
 ### Step 1: Access Namecheap DNS
 1. Go to: `https://namecheap.com`
 2. Click **"Domain List"** on the left
-3. Find your domain: `ishanime.com`
+3. Find your domain: `ishanime.me`
 4. Click **"Manage"** next to it
 5. Go to **"Advanced DNS"** tab
 
@@ -25,12 +25,12 @@ In the **"Host Records"** section, add:
 | **CNAME** | `api` | `ishanime-api-pzssf.bunny.run` | **Automatic** |
 
 **What this does:**
-- Creates: `api.ishanime.com`
+- Creates: `api.ishanime.me`
 - Points to: `ishanime-api-pzssf.bunny.run`
 
 ### Step 3: Wait for DNS Propagation
 - **Time**: 5-30 minutes
-- **Check**: `ping api.ishanime.com`
+- **Check**: `ping api.ishanime.me`
 - **Online Check**: `https://dnschecker.org`
 
 ---
@@ -42,12 +42,12 @@ In the **"Host Records"** section, add:
 2. Find your script (ID: 47325)
 3. Go to **"Hostnames"** tab
 4. Click **"Add Hostname"**
-5. Enter: `api.ishanime.com`
+5. Enter: `api.ishanime.me`
 6. Click **"Add"**
 
 ### Step 2: Enable SSL
 1. In the **"Hostnames"** tab
-2. Find `api.ishanime.com`
+2. Find `api.ishanime.me`
 3. Click **"Enable SSL"**
 4. Wait for green lock icon (free SSL from Bunny)
 
@@ -67,21 +67,21 @@ In `frontend/script.js`, change:
 const API_URL = 'https://ishanime-api-pzssf.bunny.run';
 
 // After
-const API_URL = 'https://api.ishanime.com';
+const API_URL = 'https://api.ishanime.me';
 ```
 
 ### Step 2: Test New Endpoints
 After setup, test these URLs:
 
-1. **Health**: `https://api.ishanime.com/api/health`
-2. **Anime**: `https://api.ishanime.com/api/anime`
-3. **Site**: `https://api.ishanime.com/api/site`
+1. **Health**: `https://api.ishanime.me/api/health`
+2. **Anime**: `https://api.ishanime.me/api/anime`
+3. **Site**: `https://api.ishanime.me/api/site`
 
 ---
 
 ## ✅ **Success Criteria**
 
-- [ ] DNS propagates: `api.ishanime.com` resolves
+- [ ] DNS propagates: `api.ishanime.me` resolves
 - [ ] SSL enabled: Green lock icon in Bunny
 - [ ] Backend responds: JSON data from custom domain
 - [ ] Frontend updated: Points to custom domain
@@ -110,7 +110,7 @@ After setup, test these URLs:
 
 ## 🎌 **Benefits of Custom Domain**
 
-✅ **Professional**: `api.ishanime.com` looks better  
+✅ **Professional**: `api.ishanime.me` looks better  
 ✅ **Stable**: Won't change if you recreate script  
 ✅ **Branded**: Matches your domain  
 ✅ **SSL**: Free HTTPS from Bunny  

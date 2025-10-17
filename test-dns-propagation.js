@@ -7,11 +7,11 @@ const { promisify } = require('util');
 const resolveCname = promisify(dns.resolveCname);
 
 async function testDNSPropagation() {
-    console.log('🌐 Testing DNS Propagation for api.ishanime.com...\n');
+    console.log('🌐 Testing DNS Propagation for api.ishanime.me...\n');
     
     try {
         // Test CNAME resolution
-        const cnameRecords = await resolveCname('api.ishanime.com');
+        const cnameRecords = await resolveCname('api.ishanime.me');
         console.log('✅ CNAME Records found:');
         cnameRecords.forEach(record => {
             console.log(`   → ${record}`);
@@ -23,7 +23,7 @@ async function testDNSPropagation() {
         );
         
         if (pointsToBunny) {
-            console.log('\n🎉 SUCCESS: api.ishanime.com points to Bunny CDN!');
+            console.log('\n🎉 SUCCESS: api.ishanime.me points to Bunny CDN!');
             console.log('✅ DNS propagation is complete');
             console.log('✅ Ready to configure SSL in Bunny dashboard');
         } else {
@@ -50,8 +50,8 @@ async function testDNSPropagation() {
     console.log('\n📋 Next Steps:');
     console.log('1. If DNS is working: Add hostname in Bunny dashboard');
     console.log('2. Enable SSL in Bunny');
-    console.log('3. Update frontend API_URL to https://api.ishanime.com');
-    console.log('4. Test: https://api.ishanime.com/api/health');
+    console.log('3. Update frontend API_URL to https://api.ishanime.me');
+    console.log('4. Test: https://api.ishanime.me/api/health');
 }
 
 // Run the test
