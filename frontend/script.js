@@ -1,15 +1,7 @@
 // Configuration
-// 🚀 REPLACE THIS URL with your actual Bunny Edge Scripting URL after deployment
-// 
-// Steps to get your URL:
-// 1. Deploy bunny-edge-script.js to Bunny Dashboard → Edge Scripting
-// 2. Your URL will be: https://your-script-name.bunnycdn.com
-// 3. Or use your custom domain if configured
-//
-// Example URLs:
-// - https://ishanime-api.bunnycdn.com
-// - https://api.ishanime.me (custom domain)
-const API_URL = 'https://ishanime-api-pzssf.bunny.run'; // ✅ Bunny Edge Scripting URL
+// 🚀 Using Vercel Serverless Functions - Much simpler and more reliable!
+// No more Bunny Edge Script loops, DNS issues, or deployment complexity
+const API_URL = ''; // ✅ Using same domain - Vercel handles everything
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -55,21 +47,19 @@ function setupEventListeners() {
 async function checkBackendStatus() {
     const statusElement = document.getElementById('backendStatus');
     
-    // Always try to connect to backend via API proxy
-    
     try {
-        console.log('🔍 Testing backend connection...');
-        console.log('🌐 Health check URL:', `${API_URL}/api/health`);
-        const response = await fetch(`${API_URL}/api/health`);
+        console.log('🔍 Testing Vercel API connection...');
+        console.log('🌐 Health check URL:', '/api/health');
+        const response = await fetch('/api/health');
         console.log('📡 Health check status:', response.status);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('✅ Backend health data:', data);
+            console.log('✅ Vercel API health data:', data);
             statusElement.innerHTML = `
                 <div class="status-content">
                     <div class="status-icon">✅</div>
-                    <p>Connected to backend - Loading real anime content...</p>
+                    <p>Connected to Vercel API - Loading real anime content...</p>
                 </div>
             `;
             // Hide status after 3 seconds
@@ -81,10 +71,8 @@ async function checkBackendStatus() {
             showBackendError();
         }
     } catch (error) {
-        console.error('❌ Backend connection failed:', error);
+        console.error('❌ Vercel API connection failed:', error);
         console.error('❌ Connection error details:', error.message);
-        console.error('❌ API URL being used:', API_URL);
-        console.error('❌ Full health check URL:', `${API_URL}/api/health`);
         showBackendError();
     }
 }
@@ -95,7 +83,7 @@ function showBackendError() {
     statusElement.innerHTML = `
         <div class="status-content">
             <div class="status-icon">⚠️</div>
-            <p>Backend not connected - Using demo mode</p>
+            <p>Vercel API not connected - Using demo mode</p>
             <p style="font-size: 0.8em; margin-top: 5px; opacity: 0.7;">
                 Check console (F12) for connection details
             </p>
@@ -106,7 +94,7 @@ function showBackendError() {
 // Load site configuration from backend
 async function loadSiteConfig() {
     try {
-        const response = await fetch(`${API_URL}/api/site`);
+        const response = await fetch('/api/site');
         if (response.ok) {
             const data = await response.json();
             if (data.success && data.data) {
@@ -148,33 +136,31 @@ function updateSiteBranding(config) {
 async function loadAnime() {
     showLoading();
     
-    // Always try to load from backend via API proxy
-    
     try {
-        console.log('🔄 Fetching anime from backend...');
-        console.log('🌐 API URL:', API_URL);
-        const response = await fetch(`${API_URL}/api/anime`);
-        console.log('📡 Backend response status:', response.status);
-        console.log('📡 Backend response headers:', response.headers);
+        console.log('🔄 Fetching anime from Vercel API...');
+        console.log('🌐 API URL:', '/api/anime');
+        const response = await fetch('/api/anime');
+        console.log('📡 Vercel API response status:', response.status);
+        console.log('📡 Vercel API response headers:', response.headers);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('📊 Backend response data:', data);
+            console.log('📊 Vercel API response data:', data);
             
             if (data.success && data.data && data.data.length > 0) {
                 animeData = data.data;
-                console.log(`✅ Loaded ${animeData.length} anime shows from backend`);
+                console.log(`✅ Loaded ${animeData.length} anime shows from Vercel API`);
                 displayAnime(animeData);
             } else {
-                console.log('⚠️ No anime data from backend, using demo data');
+                console.log('⚠️ No anime data from Vercel API, using demo data');
                 loadDemoAnime();
             }
         } else {
-            console.log('❌ Backend request failed, using demo data');
+            console.log('❌ Vercel API request failed, using demo data');
             loadDemoAnime();
         }
     } catch (error) {
-        console.error('❌ Failed to load anime:', error);
+        console.error('❌ Failed to load anime from Vercel API:', error);
         console.error('❌ Error details:', error.message);
         console.error('❌ Error stack:', error.stack);
         
@@ -184,8 +170,8 @@ async function loadAnime() {
             statusElement.innerHTML = `
                 <div class="status-content">
                     <div class="status-icon">❌</div>
-                    <p>Backend connection failed: ${error.message}</p>
-                    <p>Check if Bunny Edge Scripting is deployed</p>
+                    <p>Vercel API connection failed: ${error.message}</p>
+                    <p>Check if serverless functions are deployed</p>
                 </div>
             `;
             statusElement.style.display = 'block';
