@@ -5,10 +5,10 @@
 const fs = require('fs');
 const path = require('path');
 
-// BunnyCDN Configuration
+// BunnyCDN Configuration - Your Library Details
 const BUNNY_API_KEY = '7f0a1d07-a8a4-4e07-af7ed42722ee-bfbd-4896';
 const LIBRARY_ID = '506159';
-const DELIVERY_DOMAIN = 'vz-a01fffb9-e7a.b-cdn.net';
+const CDN_HOSTNAME = 'vz-a01fffb9-e7a.b-cdn.net';
 
 // Helper function to create URL-friendly slugs
 function slugify(text) {
@@ -69,19 +69,26 @@ function parseAnimeData(videos) {
             });
         }
 
-        // Add episode to the show
+        // Add episode to the show with correct CDN URLs
         animeMap.get(showName).episodes.push({
             id: video.guid,
             episode: episodeNumber.toString().padStart(2, '0'),
             title: video.title,
+            // Bunny iframe embed URL (most reliable for playback)
             videoUrl: `https://iframe.mediadelivery.net/play/${LIBRARY_ID}/${video.guid}`,
-            directMp4: `https://${DELIVERY_DOMAIN}/${video.guid}/play_720p.mp4`,
-            directMp4_480p: `https://${DELIVERY_DOMAIN}/${video.guid}/play_480p.mp4`,
-            directMp4_1080p: `https://${DELIVERY_DOMAIN}/${video.guid}/play_1080p.mp4`,
-            hlsUrl: `https://${DELIVERY_DOMAIN}/${video.guid}/playlist.m3u8`,
-            thumbnail: `https://${DELIVERY_DOMAIN}/${video.guid}/thumbnail.jpg`,
-            thumbnailPreview: `https://${DELIVERY_DOMAIN}/${video.guid}/preview.jpg`,
-            uploadedAt: video.dateUploaded || video.createdAt || new Date().toISOString()
+            // Direct MP4 URLs for different qualities
+            directMp4: `https://${CDN_HOSTNAME}/${video.guid}/play_720p.mp4`,
+            directMp4_480p: `https://${CDN_HOSTNAME}/${video.guid}/play_480p.mp4`,
+            directMp4_1080p: `https://${CDN_HOSTNAME}/${video.guid}/play_1080p.mp4`,
+            // HLS streaming URL
+            hlsUrl: `https://${CDN_HOSTNAME}/${video.guid}/playlist.m3u8`,
+            // Thumbnail URLs
+            thumbnail: `https://${CDN_HOSTNAME}/${video.guid}/thumbnail.jpg`,
+            thumbnailPreview: `https://${CDN_HOSTNAME}/${video.guid}/preview.jpg`,
+            // Metadata
+            uploadedAt: video.dateUploaded || video.createdAt || new Date().toISOString(),
+            duration: video.duration || null,
+            size: video.size || null
         });
     });
 

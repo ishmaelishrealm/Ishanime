@@ -18,7 +18,9 @@
           "hlsUrl": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/playlist.m3u8",
           "thumbnail": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/thumbnail.jpg",
           "thumbnailPreview": "https://vz-a01fffb9-e7a.b-cdn.net/88a8c13d-4f20-4bec-a2f2-a68294127cd8/preview.jpg",
-          "uploadedAt": "2025-10-11T10:37:40.278"
+          "uploadedAt": "2025-10-11T10:37:40.278",
+          "duration": null,
+          "size": null
         },
         {
           "id": "e560c0c0-5b23-4f0c-8192-76e23e560c4b",
@@ -31,13 +33,15 @@
           "hlsUrl": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/playlist.m3u8",
           "thumbnail": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/thumbnail.jpg",
           "thumbnailPreview": "https://vz-a01fffb9-e7a.b-cdn.net/e560c0c0-5b23-4f0c-8192-76e23e560c4b/preview.jpg",
-          "uploadedAt": "2025-10-11T10:37:49.47"
+          "uploadedAt": "2025-10-11T10:37:49.47",
+          "duration": null,
+          "size": null
         }
       ]
     }
   ],
   "count": 1,
-  "timestamp": "2025-10-17T08:31:15.200Z",
+  "timestamp": "2025-10-17T08:46:18.541Z",
   "generated": true,
   "source": "BunnyCDN Video Library",
   "version": "1.0.0"
