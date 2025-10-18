@@ -7,6 +7,35 @@ let currentFilter = 'all';
 let currentAnime = null;
 let currentEpisodeIndex = 0;
 let isPlaying = false;
+let hlsInstance = null;
+
+function destroyHls() {
+    if (hlsInstance) {
+        try { hlsInstance.destroy(); } catch (_) { /* no-op */ }
+        hlsInstance = null;
+    }
+}
+
+function playWithHlsIfPossible(videoEl, hlsUrl) {
+    // Prefer HLS for smoother playback and less buffering
+    if (window.Hls && window.Hls.isSupported()) {
+        destroyHls();
+        hlsInstance = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 60
+        });
+        hlsInstance.attachMedia(videoEl);
+        hlsInstance.loadSource(hlsUrl);
+        return true;
+    }
+    if (videoEl.canPlayType && videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari native HLS
+        videoEl.src = hlsUrl;
+        return true;
+    }
+    return false;
+}
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -375,32 +404,47 @@ function openPlayer(episode, anime) {
     playerTitle.textContent = anime.title;
     playerEpisode.textContent = `Episode ${episode.episode}: ${episode.title}`;
     
-    // Clear previous video source
-    videoPlayer.src = '';
-    videoPlayer.innerHTML = '';
+    // Clear previous players
+    destroyHls();
+    const existingIframe = videoPlayer.parentNode.querySelector('iframe');
+    if (existingIframe) existingIframe.remove();
+    videoPlayer.pause();
+    videoPlayer.removeAttribute('src');
+    videoPlayer.load();
+    videoPlayer.crossOrigin = 'anonymous';
     
-    // Try different video sources in order of preference
-    if (episode.directMp4_1080p) {
-        // Use HTML5 video for direct MP4 1080p
+    // Prefer HLS first for adaptive streaming
+    let started = false;
+    if (episode.hlsUrl) {
+        started = playWithHlsIfPossible(videoPlayer, episode.hlsUrl);
+        if (started) {
+            videoPlayer.style.display = 'block';
+            console.log('🎬 Using HLS:', episode.hlsUrl);
+        }
+    }
+
+    // If HLS not available, try MP4s
+    if (!started && episode.directMp4_1080p) {
         videoPlayer.src = episode.directMp4_1080p;
         videoPlayer.style.display = 'block';
         console.log('🎬 Using direct MP4 1080p:', episode.directMp4_1080p);
-    } else if (episode.directMp4) {
-        // Use HTML5 video for direct MP4 720p
+        started = true;
+    }
+    if (!started && episode.directMp4) {
         videoPlayer.src = episode.directMp4;
         videoPlayer.style.display = 'block';
         console.log('🎬 Using direct MP4 720p:', episode.directMp4);
-    } else if (episode.directMp4_480p) {
-        // Use HTML5 video for direct MP4 480p
+        started = true;
+    }
+    if (!started && episode.directMp4_480p) {
         videoPlayer.src = episode.directMp4_480p;
         videoPlayer.style.display = 'block';
         console.log('🎬 Using direct MP4 480p:', episode.directMp4_480p);
-    } else if (episode.hlsUrl) {
-        // Use HTML5 video for HLS
-        videoPlayer.src = episode.hlsUrl;
-        videoPlayer.style.display = 'block';
-        console.log('🎬 Using HLS:', episode.hlsUrl);
-    } else if (episode.videoUrl) {
+        started = true;
+    }
+
+    // Finally, fallback to iframe
+    if (!started && episode.videoUrl) {
         // Use iframe for Bunny CDN iframe URLs
         const iframe = document.createElement('iframe');
         iframe.src = episode.videoUrl;
@@ -414,9 +458,23 @@ function openPlayer(episode, anime) {
         videoPlayer.style.display = 'none';
         videoPlayer.parentNode.appendChild(iframe);
         console.log('🎬 Using iframe:', episode.videoUrl);
+        started = true;
     } else {
-        alert('Video not available');
-        return;
+        // Attach error fallback: if MP4/HLS fails, switch to iframe automatically
+        videoPlayer.onerror = () => {
+            if (episode.videoUrl && !videoPlayer.parentNode.querySelector('iframe')) {
+                const ifr = document.createElement('iframe');
+                ifr.src = episode.videoUrl;
+                ifr.style.width = '100%';
+                ifr.style.height = '100%';
+                ifr.style.border = 'none';
+                ifr.allowFullscreen = true;
+                ifr.allow = 'autoplay; fullscreen';
+                videoPlayer.style.display = 'none';
+                videoPlayer.parentNode.appendChild(ifr);
+                console.log('⚠️ Fallback to iframe due to playback error');
+            }
+        };
     }
     
     // Update episode list
@@ -588,12 +646,19 @@ function changeVideoQuality() {
             break;
         case 'auto':
         default:
-            newSource = episode.directMp4_1080p || episode.directMp4 || episode.directMp4_480p;
+            // Prefer HLS in auto mode
+            if (episode.hlsUrl && (window.Hls && window.Hls.isSupported() || (videoPlayer.canPlayType && videoPlayer.canPlayType('application/vnd.apple.mpegurl')))) {
+                playWithHlsIfPossible(videoPlayer, episode.hlsUrl);
+                console.log('🎚️ Auto quality using HLS:', episode.hlsUrl);
+                return;
+            }
+            newSource = episode.directMp4 || episode.directMp4_1080p || episode.directMp4_480p;
             break;
     }
     
     if (newSource && newSource !== videoPlayer.src) {
         const currentTime = videoPlayer.currentTime;
+        destroyHls();
         videoPlayer.src = newSource;
         videoPlayer.currentTime = currentTime;
         console.log(`🎬 Quality changed to ${selectedQuality}:`, newSource);
