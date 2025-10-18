@@ -1,36 +1,10 @@
-name: Deploy Bunny Edge Script Backend
+name: Deprecated - Bunny Edge Script Backend (disabled)
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - 'backend/**'  # Only trigger when backend files change
+  workflow_dispatch:  # keep file for history; no automatic runs
 
 jobs:
-  deploy-bunny-script:
+  noop:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Verify backend files
-        run: |
-          echo "Checking backend files..."
-          if [ ! -f "backend/bunny-edge-script.js" ]; then
-            echo "❌ Missing backend/bunny-edge-script.js"
-            exit 1
-          fi
-          echo "✅ Backend files found"
-
-      - name: Deploy Bunny Edge Script
-        env:
-          BUNNY_SCRIPT_ID: ${{ secrets.BUNNY_SCRIPT_ID }}
-          BUNNY_DEPLOYMENT_KEY: ${{ secrets.BUNNY_DEPLOYMENT_KEY }}
-        run: |
-          echo "🚀 Deploying Bunny Edge Script..."
-          curl -X POST "https://api.bunny.net/edge/script/${BUNNY_SCRIPT_ID}/deploy" \
-            -H "Accept: application/json" \
-            -H "AccessKey: $BUNNY_DEPLOYMENT_KEY"
-          echo "✅ Bunny Edge Script deployed successfully!"
+      - run: echo "This workflow is deprecated and intentionally disabled."
