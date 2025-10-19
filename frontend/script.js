@@ -88,17 +88,56 @@ function playDirectVideo(episode) {
         { url: episode.directMp4_480p, quality: '480p' }
     ];
     
+    console.log('🔍 Available MP4 URLs:', mp4Urls);
+    
     for (const mp4 of mp4Urls) {
         if (mp4.url) {
+            console.log(`🎬 Trying Direct MP4 ${mp4.quality}:`, mp4.url);
             videoPlayer.src = mp4.url;
             videoPlayer.style.display = 'block';
-            console.log(`🎬 Direct MP4 ${mp4.quality}:`, mp4.url);
+            
+            // Test if URL is accessible
+            testVideoUrl(mp4.url, mp4.quality);
             return true;
         }
     }
     
     console.log('❌ No direct MP4 URLs available');
     return false;
+}
+
+// Test if video URL is accessible
+async function testVideoUrl(url, quality) {
+    try {
+        console.log(`🧪 Testing ${quality} URL: ${url}`);
+        const response = await fetch(url, { method: 'HEAD' });
+        console.log(`📊 ${quality} URL Status: ${response.status} ${response.statusText}`);
+        
+        if (response.ok) {
+            console.log(`✅ ${quality} URL is accessible`);
+        } else {
+            console.log(`❌ ${quality} URL failed: ${response.status}`);
+        }
+    } catch (error) {
+        console.log(`❌ ${quality} URL error: ${error.message}`);
+    }
+}
+
+// Manual test function for debugging
+function testCurrentVideo() {
+    const videoPlayer = document.getElementById('videoPlayer');
+    console.log('🔍 Current video debug info:');
+    console.log('  src:', videoPlayer.src);
+    console.log('  readyState:', videoPlayer.readyState);
+    console.log('  networkState:', videoPlayer.networkState);
+    console.log('  error:', videoPlayer.error);
+    console.log('  paused:', videoPlayer.paused);
+    console.log('  currentTime:', videoPlayer.currentTime);
+    console.log('  duration:', videoPlayer.duration);
+    
+    if (videoPlayer.src) {
+        testVideoUrl(videoPlayer.src, 'Current');
+    }
 }
 
 function playHLSVideo(episode) {
@@ -637,10 +676,31 @@ function openPlayer(episode, anime) {
             console.log(`✅ ${currentMethod} started loading successfully`);
         };
         
-        // Error handler
-        videoPlayer.onerror = () => {
-            console.log(`❌ ${currentMethod} failed to load`);
+        videoPlayer.oncanplay = () => {
+            console.log(`🎬 ${currentMethod} can start playing`);
         };
+        
+        videoPlayer.onloadeddata = () => {
+            console.log(`📊 ${currentMethod} data loaded`);
+        };
+        
+        // Error handler with detailed info
+        videoPlayer.onerror = (e) => {
+            console.log(`❌ ${currentMethod} failed to load`);
+            console.log('Video error details:', e);
+            console.log('Video error code:', videoPlayer.error?.code);
+            console.log('Video error message:', videoPlayer.error?.message);
+            console.log('Current video src:', videoPlayer.src);
+            console.log('Video ready state:', videoPlayer.readyState);
+            console.log('Video network state:', videoPlayer.networkState);
+        };
+        
+        // Add timeout to detect if video never loads
+        setTimeout(() => {
+            if (videoPlayer.readyState === 0) {
+                console.log(`⏰ ${currentMethod} timeout - video never started loading`);
+            }
+        }, 5000);
     }
     
     // Update episode list
