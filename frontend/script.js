@@ -642,9 +642,9 @@ function createAnimeCard(anime) {
 // Open anime detail and player
 function openAnimeDetail(anime) {
     if (anime.episodes && anime.episodes.length > 0) {
-        currentAnime = anime;
-        currentEpisodeIndex = 0;
-        openPlayer(anime.episodes[0], anime);
+        // Navigate to player page with anime ID and episode 0 (first episode)
+        const playerUrl = `player.html?anime=${encodeURIComponent(anime.id)}&episode=0`;
+        window.location.href = playerUrl;
     } else {
         alert('No episodes available for this anime.');
     }
@@ -776,9 +776,36 @@ function selectEpisode(index) {
         currentEpisodeIndex = index;
         const episode = currentAnime.episodes[index];
         
-        // Update player info
-        const playerEpisode = document.getElementById('playerEpisode');
-        playerEpisode.textContent = `Episode ${episode.episode}: ${episode.title}`;
+        // Check if we're on the player page
+        if (window.location.pathname.includes('player.html')) {
+            // Update URL without reloading
+            const newUrl = `player.html?anime=${encodeURIComponent(currentAnime.id)}&episode=${index}`;
+            window.history.pushState({}, '', newUrl);
+            
+            // Update page title
+            document.title = `${currentAnime.title} - Episode ${episode.episode} | Ishrealmanime`;
+            
+            // Update player info
+            const playerTitle = document.getElementById('playerTitle');
+            const playerEpisode = document.getElementById('playerEpisode');
+            
+            if (playerTitle) playerTitle.textContent = currentAnime.title;
+            if (playerEpisode) playerEpisode.textContent = `Episode ${episode.episode}: ${episode.title}`;
+            
+            // Update anime info
+            const animeInfo = document.getElementById('animeInfo');
+            if (animeInfo) {
+                animeInfo.innerHTML = `
+                    <strong>Title:</strong> ${currentAnime.title}<br>
+                    <strong>Episodes:</strong> ${currentAnime.episodes.length}<br>
+                    <strong>Current:</strong> Episode ${episode.episode}
+                `;
+            }
+        } else {
+            // Update player info for section view
+            const playerEpisode = document.getElementById('playerEpisode');
+            if (playerEpisode) playerEpisode.textContent = `Episode ${episode.episode}: ${episode.title}`;
+        }
         
         // Update video source
         const videoPlayer = document.getElementById('videoPlayer');

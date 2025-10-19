@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player - Ishrealmanime</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="icon" type="image/png" href="/public/assets/ishanime-logo.png">
+    <style>
+        /* Player page specific styles */
+        .player-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .player-header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        
+        .player-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .player-logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+        
+        .player-logo h1 {
+            font-size: 24px;
+            margin: 0;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .player-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .player-main {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+        
+        .video-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .video-info {
+            margin-bottom: 20px;
+        }
+        
+        .video-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .video-episode {
+            font-size: 18px;
+            color: #ccc;
+            margin: 0;
+        }
+        
+        .video-container {
+            flex: 1;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            min-height: 400px;
+        }
+        
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .control-btn.primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+        }
+        
+        .control-btn.primary:hover {
+            transform: translateY(-2px) scale(1.05);
+        }
+        
+        .sidebar {
+            width: 350px;
+            background: rgba(0, 0, 0, 0.6);
+            border-left: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .episode-list {
+            margin-bottom: 30px;
+        }
+        
+        .episode-list h3 {
+            font-size: 20px;
+            margin: 0 0 15px 0;
+            color: #ff6b6b;
+        }
+        
+        .episode-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .episode-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .episode-item.active {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-color: transparent;
+        }
+        
+        .episode-number {
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .episode-item.active .episode-number {
+            color: white;
+        }
+        
+        .episode-title {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 4px;
+        }
+        
+        .episode-item.active .episode-title {
+            color: white;
+        }
+        
+        .player-mode-selector {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .player-mode-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .player-mode-selector select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .player-mode-selector select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        .anime-info {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .anime-info h4 {
+            margin: 0 0 10px 0;
+            color: #ff6b6b;
+        }
+        
+        .anime-info p {
+            margin: 5px 0;
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .player-main {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 300px;
+            }
+            
+            .video-section {
+                padding: 15px;
+            }
+            
+            .video-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body class="player-page">
+    <header class="player-header">
+        <div class="player-logo" onclick="goHome()">
+            <img src="/public/assets/ishanime-logo.png" alt="Ishrealm" onerror="this.src='/public/assets/logo.png'">
+            <h1>Ishrealmanime</h1>
+        </div>
+        <nav class="player-nav">
+            <a href="index.html" class="nav-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9,22 9,12 15,12 15,22"></polyline>
+                </svg>
+                Home
+            </a>
+            <button class="nav-btn" onclick="toggleFullscreen()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+                Fullscreen
+            </button>
+        </nav>
+    </header>
+
+    <main class="player-main">
+        <section class="video-section">
+            <div class="video-info">
+                <h1 id="playerTitle" class="video-title">Loading...</h1>
+                <p id="playerEpisode" class="video-episode">Select an episode</p>
+            </div>
+            
+            <div class="video-container" id="videoContainer">
+                <video id="videoPlayer" class="video-player" controls>
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <div class="player-controls">
+                <button class="control-btn" onclick="previousEpisode()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="19,20 9,12 19,4 19,20"></polygon>
+                        <line x1="5" y1="19" x2="5" y2="5"></line>
+                    </svg>
+                    Previous
+                </button>
+                <button class="control-btn primary" onclick="togglePlayPause()">
+                    <svg id="playPauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5,3 19,12 5,21 5,3"></polygon>
+                    </svg>
+                    <span id="playPauseText">Play</span>
+                </button>
+                <button class="control-btn" onclick="nextEpisode()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5,4 15,12 5,20 5,4"></polygon>
+                        <line x1="19" y1="5" x2="19" y2="19"></line>
+                    </svg>
+                    Next
+                </button>
+            </div>
+        </section>
+        
+        <aside class="sidebar">
+            <div class="player-mode-selector">
+                <label>Player Mode:</label>
+                <select id="playerModeSelect" onchange="setPlayerMode(this.value)">
+                    <option value="auto">Auto</option>
+                    <option value="direct">Direct MP4</option>
+                    <option value="hls">HLS Stream</option>
+                    <option value="iframe" selected>Iframe (Default)</option>
+                </select>
+            </div>
+            
+            <div class="episode-list">
+                <h3>Episodes</h3>
+                <div id="episodeList">
+                    <p style="color: #666; text-align: center;">Loading episodes...</p>
+                </div>
+            </div>
+            
+            <div class="anime-info">
+                <h4>Anime Info</h4>
+                <p id="animeInfo">Select an anime to view information</p>
+            </div>
+        </aside>
+    </main>
+
+    <script src="./script.js"></script>
+    <script>
+        // Player page specific functions
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Override the openPlayer function to work with the player page
+        function openPlayerPage(episode, anime) {
+            // Update page title
+            document.title = `${anime.title} - Episode ${episode.episode} | Ishrealmanime`;
+            
+            // Update video info
+            document.getElementById('playerTitle').textContent = anime.title;
+            document.getElementById('playerEpisode').textContent = `Episode ${episode.episode}: ${episode.title}`;
+            
+            // Update anime info
+            document.getElementById('animeInfo').innerHTML = `
+                <strong>Title:</strong> ${anime.title}<br>
+                <strong>Episodes:</strong> ${anime.episodes.length}<br>
+                <strong>Current:</strong> Episode ${episode.episode}
+            `;
+            
+            // Call the original openPlayer function
+            openPlayer(episode, anime);
+        }
+        
+        // Initialize player page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get anime and episode from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const animeId = urlParams.get('anime');
+            const episodeIndex = parseInt(urlParams.get('episode')) || 0;
+            
+            if (animeId) {
+                // Load the specific anime and episode
+                loadAnimeForPlayer(animeId, episodeIndex);
+            } else {
+                // No specific anime, show message
+                document.getElementById('playerTitle').textContent = 'No anime selected';
+                document.getElementById('playerEpisode').textContent = 'Please select an anime from the home page';
+            }
+        });
+        
+        async function loadAnimeForPlayer(animeId, episodeIndex) {
+            try {
+                const response = await fetch('/anime.json');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const anime = result.data.find(a => a.id === animeId);
+                    if (anime && anime.episodes[episodeIndex]) {
+                        currentAnime = anime;
+                        currentEpisodeIndex = episodeIndex;
+                        openPlayerPage(anime.episodes[episodeIndex], anime);
+                        updateEpisodeList(anime.episodes);
+                    } else {
+                        document.getElementById('playerTitle').textContent = 'Anime not found';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading anime:', error);
+                document.getElementById('playerTitle').textContent = 'Error loading anime';
+            }
+        }
+    </script>
+</body>
+</html>
