@@ -310,6 +310,30 @@ function setupEventListeners() {
         }
     });
     
+    // Anime detail popup event listeners
+    const closeAnimeDetailBtn = document.getElementById('close-anime-detail');
+    const animeDetailBackdrop = document.getElementById('anime-detail-backdrop');
+    
+    if (closeAnimeDetailBtn) {
+        closeAnimeDetailBtn.addEventListener('click', closeAnimeDetailPopup);
+        console.log('✅ Anime detail close button event listener added');
+    }
+    
+    if (animeDetailBackdrop) {
+        animeDetailBackdrop.addEventListener('click', closeAnimeDetailPopup);
+        console.log('✅ Anime detail backdrop event listener added');
+    }
+    
+    // Keyboard support for closing popup
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const popup = document.getElementById('anime-detail-popup');
+            if (popup && popup.classList.contains('active')) {
+                closeAnimeDetailPopup();
+            }
+        }
+    });
+    
     // Video player events
     const videoPlayer = document.getElementById('videoPlayer');
     videoPlayer.addEventListener('play', () => {
@@ -665,7 +689,7 @@ function displayAnime(anime) {
 function createAnimeCard(anime) {
     const card = document.createElement('div');
     card.className = 'show-card';
-    card.onclick = () => openAnimeDetail(anime);
+    card.onclick = () => openAnimeDetailPopup(anime);
     
     // Get the best available thumbnail with debugging
     const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
@@ -1201,6 +1225,112 @@ function playAnime(id) {
     
     console.log('🎬 Playing anime:', anime.title, 'Episode:', firstEpisode.episode);
     openPlayer(firstEpisode, anime);
+}
+
+// === Anime Detail Popup Functions ===
+
+// Open anime detail popup
+function openAnimeDetailPopup(anime) {
+    console.log('📖 Opening anime detail popup for:', anime.title);
+    
+    const popup = document.getElementById('anime-detail-popup');
+    const backdrop = document.getElementById('anime-detail-backdrop');
+    const detailInfo = document.getElementById('anime-detail-info');
+    
+    if (!popup || !backdrop || !detailInfo) {
+        console.error('❌ Anime detail popup elements not found');
+        return;
+    }
+    
+    // Get the best thumbnail for the poster
+    const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
+    const posterImage = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishanime-logo.png';
+    
+    // Generate episode count and duration info
+    const episodeCount = anime.episodes ? anime.episodes.length : 0;
+    const totalDuration = anime.episodes ? anime.episodes.reduce((total, ep) => total + (ep.duration || 0), 0) : 0;
+    const avgDuration = episodeCount > 0 ? Math.round(totalDuration / episodeCount) : 0;
+    
+    // Create the popup content
+    detailInfo.innerHTML = `
+        <div class="anime-detail-header">
+            <img src="${posterImage}" alt="${anime.title}" class="anime-detail-poster" 
+                 onerror="this.src='assets/ishanime-logo.png'">
+            <div class="anime-detail-meta">
+                <h2 class="anime-detail-title">${anime.title}</h2>
+                <div class="anime-detail-stats">
+                    <div class="anime-detail-stat">📺 ${episodeCount} Episodes</div>
+                    <div class="anime-detail-stat">⏱️ ${avgDuration > 0 ? avgDuration + ' min avg' : 'Duration unknown'}</div>
+                    <div class="anime-detail-stat">🎬 ${anime.genre || 'Anime'}</div>
+                </div>
+                <p class="anime-detail-description">
+                    ${anime.description || 'An exciting anime series with engaging characters and thrilling adventures. Watch now to discover the story!'}
+                </p>
+            </div>
+        </div>
+        
+        <div class="anime-detail-episodes">
+            <h3>Episodes (${episodeCount})</h3>
+            <div class="episodes-grid">
+                ${anime.episodes ? anime.episodes.map((episode, index) => `
+                    <div class="episode-card" onclick="playEpisodeFromPopup('${anime.id}', ${index})">
+                        <img src="${episode.thumbnailPreview || episode.thumbnail || 'assets/ishanime-logo.png'}" 
+                             alt="${episode.title || `Episode ${episode.episode}`}" 
+                             class="episode-thumbnail"
+                             onerror="this.src='assets/ishanime-logo.png'">
+                        <div class="episode-info">
+                            <h4 class="episode-title">${episode.title || `Episode ${episode.episode}`}</h4>
+                            <p class="episode-number">Episode ${episode.episode || index + 1}</p>
+                        </div>
+                        <button class="episode-watch-btn" onclick="event.stopPropagation(); playEpisodeFromPopup('${anime.id}', ${index})">
+                            ▶ Watch
+                        </button>
+                    </div>
+                `).join('') : '<p>No episodes available</p>'}
+            </div>
+        </div>
+    `;
+    
+    // Show the popup
+    popup.classList.add('active');
+    backdrop.classList.add('active');
+    
+    console.log('✅ Anime detail popup opened');
+}
+
+// Close anime detail popup
+function closeAnimeDetailPopup() {
+    console.log('📖 Closing anime detail popup');
+    
+    const popup = document.getElementById('anime-detail-popup');
+    const backdrop = document.getElementById('anime-detail-backdrop');
+    
+    if (popup && backdrop) {
+        popup.classList.remove('active');
+        backdrop.classList.remove('active');
+        console.log('✅ Anime detail popup closed');
+    }
+}
+
+// Play episode from popup
+function playEpisodeFromPopup(animeId, episodeIndex) {
+    console.log('🎬 Playing episode from popup:', animeId, episodeIndex);
+    
+    const anime = animeData.find(a => a.id === animeId);
+    if (!anime || !anime.episodes || !anime.episodes[episodeIndex]) {
+        console.error('❌ Episode not found');
+        return;
+    }
+    
+    const episode = anime.episodes[episodeIndex];
+    
+    // Close the popup first
+    closeAnimeDetailPopup();
+    
+    // Then open the player
+    setTimeout(() => {
+        openPlayer(episode, anime);
+    }, 300); // Small delay for smooth transition
 }
 
 // Sponsorship popup is now handled by sponsor/sponsor.js
