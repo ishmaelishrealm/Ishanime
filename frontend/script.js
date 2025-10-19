@@ -39,6 +39,8 @@ function playWithHlsIfPossible(videoEl, hlsUrl) {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    if (window.__ISH_INIT_DONE) return;
+    window.__ISH_INIT_DONE = true;
     checkBackendStatus();
     loadSiteConfig();
     loadAnime();
