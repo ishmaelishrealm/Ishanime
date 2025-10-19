@@ -119,8 +119,7 @@ function playDirectVideo(episode) {
             videoPlayer.oncanplay = () => console.log(`✅ ${mp4.quality} can play`);
             videoPlayer.onerror = (e) => console.log(`❌ ${mp4.quality} error:`, e);
             
-            // Test if URL is accessible
-            testVideoUrl(mp4.url, mp4.quality);
+            // URL testing removed to prevent glitching
             return true;
         }
     }
@@ -129,21 +128,13 @@ function playDirectVideo(episode) {
     return false;
 }
 
-// Test if video URL is accessible
+// Test if video URL is accessible (simplified to prevent glitching)
 async function testVideoUrl(url, quality) {
     try {
         console.log(`🧪 Testing ${quality} URL: ${url}`);
-        const response = await fetch(url, { 
-            method: 'HEAD',
-            mode: 'cors',
-            credentials: 'omit'
-        });
+        // Simple fetch without CORS mode to prevent page reload issues
+        const response = await fetch(url, { method: 'HEAD' });
         console.log(`📊 ${quality} URL Status: ${response.status} ${response.statusText}`);
-        console.log(`📊 CORS Headers:`, {
-            'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
-            'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
-            'Content-Type': response.headers.get('Content-Type')
-        });
         
         if (response.ok) {
             console.log(`✅ ${quality} URL is accessible`);
@@ -152,7 +143,7 @@ async function testVideoUrl(url, quality) {
         }
     } catch (error) {
         console.log(`❌ ${quality} URL error: ${error.message}`);
-        if (error.message.includes('CORS')) {
+        if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
             console.log(`🚨 CORS ERROR: Bunny CDN needs CORS configuration for your domain`);
             console.log(`🔧 Fix: Add your domain to Bunny Video Library → Settings → CORS`);
         }
@@ -212,14 +203,11 @@ function testCurrentVideo() {
             { url: `https://iframe.mediadelivery.net/play/506159/${episode.id}`, type: 'Iframe Player' }
         ];
         
-        testUrls.forEach(test => {
-            testVideoUrl(test.url, test.type);
-        });
+        // URL testing disabled to prevent glitching
+        console.log('🧪 URL testing disabled to prevent page glitching');
     }
     
-    if (videoPlayer.src) {
-        testVideoUrl(videoPlayer.src, 'Current Video Player');
-    }
+    // Current video testing disabled to prevent glitching
 }
 
 function playHLSVideo(episode) {
@@ -255,8 +243,7 @@ function playHLSVideo(episode) {
     videoPlayer.oncanplay = () => console.log('✅ HLS can play');
     videoPlayer.onerror = (e) => console.log('❌ HLS error:', e);
     
-    // Test if URL is accessible
-    testVideoUrl(hlsUrl, 'HLS');
+    // URL testing removed to prevent glitching
     return true;
 }
 
@@ -317,8 +304,7 @@ function playIframeVideo(episode) {
         console.log('❌ Iframe failed to load');
     };
     
-    // Test if URL is accessible
-    testVideoUrl(iframeUrl, 'Iframe');
+    // URL testing removed to prevent glitching
     return true;
 }
 
@@ -372,12 +358,22 @@ function addPlayerModeSelector() {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    if (window.__ISH_INIT_DONE) return;
+    if (window.__ISH_INIT_DONE) {
+        console.log('🚫 App already initialized, skipping...');
+        return;
+    }
     window.__ISH_INIT_DONE = true;
-    checkBackendStatus();
-    loadSiteConfig();
-    loadAnime();
-    setupEventListeners();
+    console.log('🚀 Initializing app...');
+    
+    // Check if on player page
+    if (window.location.pathname.includes('player.html')) {
+        initializePlayerPage();
+    } else {
+        checkBackendStatus();
+        loadSiteConfig();
+        loadAnime();
+        setupEventListeners();
+    }
 });
 
 // Setup event listeners
