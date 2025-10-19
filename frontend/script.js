@@ -133,8 +133,17 @@ function playDirectVideo(episode) {
 async function testVideoUrl(url, quality) {
     try {
         console.log(`🧪 Testing ${quality} URL: ${url}`);
-        const response = await fetch(url, { method: 'HEAD' });
+        const response = await fetch(url, { 
+            method: 'HEAD',
+            mode: 'cors',
+            credentials: 'omit'
+        });
         console.log(`📊 ${quality} URL Status: ${response.status} ${response.statusText}`);
+        console.log(`📊 CORS Headers:`, {
+            'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+            'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+            'Content-Type': response.headers.get('Content-Type')
+        });
         
         if (response.ok) {
             console.log(`✅ ${quality} URL is accessible`);
@@ -143,7 +152,29 @@ async function testVideoUrl(url, quality) {
         }
     } catch (error) {
         console.log(`❌ ${quality} URL error: ${error.message}`);
+        if (error.message.includes('CORS')) {
+            console.log(`🚨 CORS ERROR: Bunny CDN needs CORS configuration for your domain`);
+            console.log(`🔧 Fix: Add your domain to Bunny Video Library → Settings → CORS`);
+        }
     }
+}
+
+// Show CORS configuration instructions
+function showCORSInstructions() {
+    console.log(`
+🚨 CORS CONFIGURATION NEEDED:
+
+1. Go to Bunny Video Library Dashboard
+2. Navigate to: Settings → CORS
+3. Add your domains:
+   - https://ishanime.me
+   - https://www.ishanime.me
+   - https://ishanime.vercel.app (if using Vercel preview)
+4. Save changes
+5. Wait 2-3 minutes for propagation
+
+This will allow your site to access Bunny CDN videos directly.
+    `);
 }
 
 // Manual test function for debugging
@@ -268,7 +299,7 @@ function playIframeVideo(episode) {
     
     // Set background image for the container
     if (videoContainer) {
-        videoContainer.style.backgroundImage = `url('/public/assets/ishanime-logo.png')`;
+        videoContainer.style.backgroundImage = `url('/assets/ishanime-logo.png')`;
         videoContainer.style.backgroundSize = 'contain';
         videoContainer.style.backgroundRepeat = 'no-repeat';
         videoContainer.style.backgroundPosition = 'center';
@@ -684,7 +715,7 @@ function createAnimeCard(anime) {
     
     // Get the best available thumbnail with debugging
     const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
-    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || '/public/assets/ishanime-logo.png';
+    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || '/assets/ishanime-logo.png';
     
     // Debug thumbnail URLs
     console.log(`🖼️ Anime: ${anime.title}`);
@@ -699,7 +730,7 @@ function createAnimeCard(anime) {
     
     card.innerHTML = `
         <img src="${thumbnail}" alt="${anime.title}" class="show-thumbnail" 
-             onerror="console.log('❌ Thumbnail failed:', this.src); this.src='/public/assets/ishanime-logo.png'" 
+                     onerror="console.log('❌ Thumbnail failed:', this.src); this.src='/assets/ishanime-logo.png'"
              onload="console.log('✅ Thumbnail loaded:', this.src)"
              loading="lazy">
         <div class="show-info">
