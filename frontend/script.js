@@ -362,18 +362,23 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('🚫 App already initialized, skipping...');
         return;
     }
+    
+    // Prevent multiple initializations
     window.__ISH_INIT_DONE = true;
     console.log('🚀 Initializing app...');
     
-    // Check if on player page
-    if (window.location.pathname.includes('player.html')) {
-        initializePlayerPage();
-    } else {
-        checkBackendStatus();
-        loadSiteConfig();
-        loadAnime();
-        setupEventListeners();
-    }
+    // Add a small delay to ensure DOM is fully ready
+    setTimeout(() => {
+        // Check if on player page
+        if (window.location.pathname.includes('player.html')) {
+            initializePlayerPage();
+        } else {
+            checkBackendStatus();
+            loadSiteConfig();
+            loadAnime();
+            setupEventListeners();
+        }
+    }, 100);
 });
 
 // Setup event listeners
@@ -399,7 +404,18 @@ function setupEventListeners() {
     });
     
     videoPlayer.addEventListener('ended', () => {
-        nextEpisode();
+        console.log('🎬 Video ended, moving to next episode');
+        // Only auto-advance if video actually played (not just failed to load)
+        if (videoPlayer.currentTime > 0) {
+            nextEpisode();
+        } else {
+            console.log('🎬 Video ended immediately (likely failed to load), not auto-advancing');
+        }
+    });
+    
+    videoPlayer.addEventListener('error', (e) => {
+        console.log('🎬 Video error occurred:', e);
+        console.log('🎬 Video error details:', videoPlayer.error);
     });
 }
 
@@ -1018,7 +1034,10 @@ function previousEpisode() {
 
 function nextEpisode() {
     if (currentAnime && currentEpisodeIndex < currentAnime.episodes.length - 1) {
+        console.log('🎬 Moving to next episode:', currentEpisodeIndex + 1);
         selectEpisode(currentEpisodeIndex + 1);
+    } else {
+        console.log('🎬 No more episodes available');
     }
 }
 
