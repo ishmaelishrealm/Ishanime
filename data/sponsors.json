@@ -1,0 +1,27 @@
+{
+  "sponsors": [
+    {
+      "id": "grabtap",
+      "name": "GrabTap",
+      "description": "Make Money Playing Games!",
+      "subtitle": "Earn real cash on your phone",
+      "icon": "🎮",
+      "url": "https://grabtap.com/c/ishrealm?utm_source=app_share&utm_medium=share&utm_campaign=community_page&utm_content=ishrealm",
+      "features": [
+        "✅ Play fun mobile games",
+        "✅ Earn real money",
+        "✅ Cash out via PayPal, gift cards & more",
+        "✅ Support Ishrealm while you earn!"
+      ],
+      "active": true,
+      "priority": 1
+    }
+  ],
+  "settings": {
+    "showDelay": 10000,
+    "remindDelay": 1800000,
+    "rotationEnabled": false,
+    "maxShowsPerSession": 1
+  },
+  "lastUpdated": "2024-01-19T00:00:00Z"
+}

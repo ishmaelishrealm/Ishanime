@@ -1,7 +1,7 @@
 // Configuration
 // 🚀 Using Static JSON - Fastest, most reliable approach!
 // Pre-generated anime.json updated every 5 minutes via GitHub Actions
-const ANIME_JSON_URL = '/anime.json'; // ✅ Static JSON file
+const ANIME_JSON_URL = 'data/anime.json'; // ✅ Static JSON file
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -645,7 +645,7 @@ function createAnimeCard(anime) {
     
     // Get the best available thumbnail with debugging
     const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
-    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || '/assets/ishanime-logo.png';
+    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishanime-logo.png';
     
     // Debug thumbnail URLs
     console.log(`🖼️ Anime: ${anime.title}`);
@@ -660,7 +660,7 @@ function createAnimeCard(anime) {
     
     card.innerHTML = `
         <img src="${thumbnail}" alt="${anime.title}" class="show-thumbnail" 
-                     onerror="console.log('❌ Thumbnail failed:', this.src); this.src='/assets/ishanime-logo.png'"
+                     onerror="console.log('❌ Thumbnail failed:', this.src); this.src='assets/ishanime-logo.png'"
              onload="console.log('✅ Thumbnail loaded:', this.src)"
              loading="lazy">
         <div class="show-info">
@@ -1160,53 +1160,4 @@ window.addEventListener('resize', function() {
 
 // Service worker disabled to prevent potential reload loops during development
 
-// === Sponsorship Popup Functionality ===
-document.addEventListener("DOMContentLoaded", function () {
-    // Only initialize if elements exist (for index.html)
-    const popup = document.getElementById("sponsor-popup");
-    const backdrop = document.getElementById("sponsor-backdrop");
-    
-    if (!popup || !backdrop) return; // Skip if not on index page
-    
-    const closeBtn = document.getElementById("sponsor-close");
-    const laterBtn = document.getElementById("sponsor-later");
-    const linkBtn = document.getElementById("sponsor-link");
-    const sponsorUrl = "https://grabtap.com/c/ishrealm?utm_source=app_share&utm_medium=share&utm_campaign=community_page&utm_content=ishrealm";
-
-    // Check if dismissed
-    if (localStorage.getItem("sponsor_dismissed")) return;
-
-    // Show after 10 seconds
-    setTimeout(() => {
-        popup.classList.add("active");
-        backdrop.classList.add("active");
-    }, 10000);
-
-    function hidePopup() {
-        popup.classList.remove("active");
-        backdrop.classList.remove("active");
-    }
-
-    closeBtn.addEventListener("click", () => {
-        localStorage.setItem("sponsor_dismissed", "true");
-        hidePopup();
-    });
-
-    laterBtn.addEventListener("click", () => {
-        hidePopup();
-        setTimeout(() => {
-            popup.classList.add("active");
-            backdrop.classList.add("active");
-        }, 30 * 60 * 1000); // Show again after 30 minutes
-    });
-
-    linkBtn.addEventListener("click", () => {
-        window.open(sponsorUrl, "_blank");
-        localStorage.setItem("sponsor_dismissed", "true");
-        hidePopup();
-    });
-
-    backdrop.addEventListener("click", () => {
-        laterBtn.click();
-    });
-});
+// Sponsorship popup is now handled by sponsor/sponsor.js

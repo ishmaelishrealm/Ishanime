@@ -182,8 +182,8 @@ async function main() {
         // Generate final JSON
         const animeJson = generateAnimeJson(animeData);
         
-        // Write to frontend directory with change detection
-        const outputPath = path.join(__dirname, '..', 'frontend', 'anime.json');
+        // Write to data directory with change detection
+        const outputPath = path.join(__dirname, '..', 'data', 'anime.json');
         
         // Check if file exists and compare content
         let hasChanges = true;

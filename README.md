@@ -82,19 +82,26 @@ The workflow automatically:
 ## 📁 Project Structure
 
 ```
-├── frontend/
-│   ├── index.html          # Main anime browsing page
-│   ├── player.html         # Dedicated video player page
-│   ├── script.js           # Frontend JavaScript
-│   ├── styles.css          # Dark theme styling
+├── index.html              # Main anime browsing page
+├── player.html             # Dedicated video player page
+├── script.js               # Main JavaScript functionality
+├── styles.css              # Global dark theme styling
+├── vercel.json             # Vercel configuration
+├── sponsor/                # Modular sponsorship system
+│   ├── sponsor.html        # Standalone test page
+│   ├── sponsor.css         # Popup styles
+│   └── sponsor.js          # Popup logic
+├── assets/                 # Static media assets
+│   ├── ishanime-logo.png   # Site logo
+│   └── logo.png            # Fallback logo
+├── data/                   # JSON data files
 │   ├── anime.json          # Auto-generated video data
-│   └── public/assets/      # Logo and static assets
-├── scripts/
-│   ├── generate-anime-json.js  # Video sync script
-│   └── package.json        # Node.js dependencies
-├── .github/workflows/
-│   └── update-anime-json.yml   # Auto-sync workflow
-└── vercel.json             # Vercel configuration
+│   └── sponsors.json       # Sponsor configuration
+├── cdn/                    # CDN configuration
+│   └── latest-anime.json   # CDN sync status
+└── scripts/                # Build and sync scripts
+    ├── generate-anime-json.js  # Video sync script
+    └── package.json        # Node.js dependencies
 ```
 
 ## 🎮 Player Features
@@ -107,10 +114,20 @@ The workflow automatically:
 
 ## 💰 Monetization
 
+- **Modular Sponsor System**: Clean, reusable sponsorship popup
 - **GrabTap Integration**: Gaming sponsorship popup
 - **Non-intrusive**: Appears after 10 seconds
 - **User-friendly**: "Later" option available
 - **Revenue Sharing**: Supports site maintenance
+- **Easy Testing**: Standalone test page at `/sponsor/sponsor.html`
+
+### Sponsor System Features
+
+- **Modular Design**: Separate CSS/JS files for easy integration
+- **Configurable**: Customizable timing, URLs, and behavior
+- **localStorage**: Remembers user preferences
+- **Mobile Responsive**: Works on all devices
+- **Future Ready**: Support for sponsor rotation via `data/sponsors.json`
 
 ## 🧪 Testing
 

@@ -39,7 +39,7 @@ jobs:
     - name: Check for changes
       id: verify-changed-files
       run: |
-        if [ -n "$(git status --porcelain frontend/anime.json)" ]; then
+        if [ -n "$(git status --porcelain data/anime.json)" ]; then
           echo "changed=true" >> $GITHUB_OUTPUT
         else
           echo "changed=false" >> $GITHUB_OUTPUT
@@ -50,7 +50,7 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add frontend/anime.json
+        git add data/anime.json
         git commit -m "🤖 Auto-update anime.json - $(date '+%Y-%m-%d %H:%M:%S')"
         git push
     
