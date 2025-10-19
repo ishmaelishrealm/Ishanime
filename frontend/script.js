@@ -1159,3 +1159,54 @@ window.addEventListener('resize', function() {
 });
 
 // Service worker disabled to prevent potential reload loops during development
+
+// === Sponsorship Popup Functionality ===
+document.addEventListener("DOMContentLoaded", function () {
+    // Only initialize if elements exist (for index.html)
+    const popup = document.getElementById("sponsor-popup");
+    const backdrop = document.getElementById("sponsor-backdrop");
+    
+    if (!popup || !backdrop) return; // Skip if not on index page
+    
+    const closeBtn = document.getElementById("sponsor-close");
+    const laterBtn = document.getElementById("sponsor-later");
+    const linkBtn = document.getElementById("sponsor-link");
+    const sponsorUrl = "https://grabtap.com/c/ishrealm?utm_source=app_share&utm_medium=share&utm_campaign=community_page&utm_content=ishrealm";
+
+    // Check if dismissed
+    if (localStorage.getItem("sponsor_dismissed")) return;
+
+    // Show after 10 seconds
+    setTimeout(() => {
+        popup.classList.add("active");
+        backdrop.classList.add("active");
+    }, 10000);
+
+    function hidePopup() {
+        popup.classList.remove("active");
+        backdrop.classList.remove("active");
+    }
+
+    closeBtn.addEventListener("click", () => {
+        localStorage.setItem("sponsor_dismissed", "true");
+        hidePopup();
+    });
+
+    laterBtn.addEventListener("click", () => {
+        hidePopup();
+        setTimeout(() => {
+            popup.classList.add("active");
+            backdrop.classList.add("active");
+        }, 30 * 60 * 1000); // Show again after 30 minutes
+    });
+
+    linkBtn.addEventListener("click", () => {
+        window.open(sponsorUrl, "_blank");
+        localStorage.setItem("sponsor_dismissed", "true");
+        hidePopup();
+    });
+
+    backdrop.addEventListener("click", () => {
+        laterBtn.click();
+    });
+});
