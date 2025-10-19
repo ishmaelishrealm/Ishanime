@@ -81,14 +81,26 @@ async function testAllThumbnails() {
 function playDirectVideo(episode) {
     const videoPlayer = document.getElementById('videoPlayer');
     
-    // Try different MP4 qualities
+    // Clear any existing iframe
+    const existingIframe = videoPlayer.parentNode.querySelector('iframe');
+    if (existingIframe) existingIframe.remove();
+    
+    // Clear background image
+    const videoContainer = document.getElementById('videoContainer');
+    if (videoContainer) {
+        videoContainer.style.backgroundImage = 'none';
+    }
+    
+    // Try different MP4 qualities - use the correct Bunny CDN format
     const mp4Urls = [
-        { url: episode.directMp4_1080p, quality: '1080p' },
-        { url: episode.directMp4, quality: '720p' },
-        { url: episode.directMp4_480p, quality: '480p' }
+        { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_1080p.mp4`, quality: '1080p' },
+        { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_720p.mp4`, quality: '720p' },
+        { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_480p.mp4`, quality: '480p' },
+        { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play.mp4`, quality: 'default' }
     ];
     
     console.log('🔍 Available MP4 URLs:', mp4Urls);
+    console.log('🎬 Episode ID:', episode.id);
     
     for (const mp4 of mp4Urls) {
         if (mp4.url) {
@@ -143,41 +155,67 @@ function testCurrentVideo() {
 function playHLSVideo(episode) {
     const videoPlayer = document.getElementById('videoPlayer');
     
-    if (episode.hlsUrl) {
-        videoPlayer.src = episode.hlsUrl;
-        videoPlayer.style.display = 'block';
-        console.log('🎬 HLS Stream:', episode.hlsUrl);
-        return true;
+    // Clear any existing iframe
+    const existingIframe = videoPlayer.parentNode.querySelector('iframe');
+    if (existingIframe) existingIframe.remove();
+    
+    // Clear background image
+    const videoContainer = document.getElementById('videoContainer');
+    if (videoContainer) {
+        videoContainer.style.backgroundImage = 'none';
     }
     
-    console.log('❌ No HLS URL available');
-    return false;
+    // Use the correct HLS URL format
+    const hlsUrl = `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/playlist.m3u8`;
+    
+    console.log('🎬 HLS Stream:', hlsUrl);
+    videoPlayer.src = hlsUrl;
+    videoPlayer.style.display = 'block';
+    
+    // Test if URL is accessible
+    testVideoUrl(hlsUrl, 'HLS');
+    return true;
 }
 
 function playIframeVideo(episode) {
     const videoPlayer = document.getElementById('videoPlayer');
     
-    if (episode.videoUrl) {
-        const iframe = document.createElement('iframe');
-        iframe.src = episode.videoUrl;
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.allowFullscreen = true;
-        iframe.allow = 'autoplay; fullscreen';
-        iframe.setAttribute('loading', 'lazy');
-        
-        videoPlayer.style.display = 'none';
-        videoPlayer.parentNode.appendChild(iframe);
-        console.log('🎬 Iframe Player:', episode.videoUrl);
-        return true;
+    // Use the correct iframe URL format
+    const iframeUrl = `https://iframe.mediadelivery.net/play/506159/${episode.id}`;
+    
+    console.log('🎬 Iframe Player:', iframeUrl);
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = iframeUrl;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.objectFit = 'contain';
+    iframe.allowFullscreen = true;
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+    iframe.setAttribute('loading', 'lazy');
+    iframe.setAttribute('frameborder', '0');
+    
+    // Hide video player and show iframe
+    videoPlayer.style.display = 'none';
+    
+    // Set background image for the container
+    const videoContainer = document.getElementById('videoContainer');
+    if (videoContainer) {
+        videoContainer.style.backgroundImage = `url('/public/assets/ishanime-logo.png')`;
+        videoContainer.style.backgroundSize = 'contain';
+        videoContainer.style.backgroundRepeat = 'no-repeat';
+        videoContainer.style.backgroundPosition = 'center';
     }
     
-    console.log('❌ No iframe URL available');
-    return false;
+    videoPlayer.parentNode.appendChild(iframe);
+    
+    // Test if URL is accessible
+    testVideoUrl(iframeUrl, 'Iframe');
+    return true;
 }
 
 // Add player mode selector to the player section
