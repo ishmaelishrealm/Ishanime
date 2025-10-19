@@ -1353,4 +1353,4 @@ function playEpisodeFromPopup(animeId, episodeIndex) {
     }, 300); // Small delay for smooth transition
 }
 
-// Sponsorship popup is now handled by sponsor/sponsor.js
+// Sponsorship system removed - clean, ad-free experience
