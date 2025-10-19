@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor Popup Test</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="sponsor.css">
+    <style>
+        body {
+            padding: 2rem;
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .test-btn {
+            background: linear-gradient(90deg, #ff2e97, #ff6ba9);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            box-shadow: 0 0 15px rgba(255, 46, 151, 0.5);
+        }
+        
+        .test-btn.secondary {
+            background: transparent;
+            border: 1px solid #ff2e97;
+        }
+        
+        .debug-info {
+            background: #1a1a2e;
+            border: 1px solid #ff2e97;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .status {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+        }
+        
+        .status.success { background: rgba(0, 255, 0, 0.1); color: #00ff00; }
+        .status.error { background: rgba(255, 0, 0, 0.1); color: #ff0000; }
+        .status.info { background: rgba(0, 0, 255, 0.1); color: #00aaff; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎮 Sponsor Popup Test</h1>
+        <p>Testing the GrabTap sponsorship popup system</p>
+        
+        <div class="debug-info">
+            <h3>📊 Debug Information</h3>
+            <div id="debug-status">
+                <div class="status info">Checking elements...</div>
+            </div>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn" onclick="testSponsor.show()">Show Popup</button>
+            <button class="test-btn secondary" onclick="testSponsor.reset()">Reset (Clear Storage)</button>
+            <button class="test-btn secondary" onclick="testSponsor.hide()">Hide Popup</button>
+            <button class="test-btn secondary" onclick="checkElements()">Check Elements</button>
+            <button class="test-btn secondary" onclick="location.reload()">Reload Page</button>
+        </div>
+        
+        <div class="debug-info">
+            <h3>🔧 Manual Test</h3>
+            <p>You can also test manually in the browser console:</p>
+            <ul>
+                <li><code>testSponsor.show()</code> - Show popup</li>
+                <li><code>testSponsor.hide()</code> - Hide popup</li>
+                <li><code>testSponsor.reset()</code> - Reset and allow popup again</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Sponsorship Popup HTML -->
+    <div id="sponsor-backdrop" class="sponsor-backdrop"></div>
+
+    <div id="sponsor-popup" class="sponsor-popup">
+        <div class="sponsor-header">
+            <button id="sponsor-close" class="close-btn">✕</button>
+            <div class="sponsor-header-content">
+                <div class="sponsor-icon">🎮</div>
+                <div>
+                    <h3>Make Money Playing Games!</h3>
+                    <p>Earn real cash on your phone</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="sponsor-body">
+            <p><strong>Download GrabTap</strong> and start earning money by playing games on your phone!</p>
+            <ul>
+                <li>✅ Play fun mobile games</li>
+                <li>✅ Earn real money</li>
+                <li>✅ Cash out via PayPal, gift cards & more</li>
+                <li>✅ Support Ishrealm while you earn!</li>
+            </ul>
+
+            <div class="sponsor-buttons">
+                <button id="sponsor-link" class="btn-primary">Get GrabTap ↗</button>
+                <button id="sponsor-later" class="btn-outline">Later</button>
+            </div>
+
+            <p class="sponsor-note">Sponsored • Helps keep Ishrealm free</p>
+        </div>
+    </div>
+
+    <script src="sponsor.js"></script>
+    <script>
+        // Check elements function
+        function checkElements() {
+            const popup = document.getElementById('sponsor-popup');
+            const backdrop = document.getElementById('sponsor-backdrop');
+            const closeBtn = document.getElementById('sponsor-close');
+            const laterBtn = document.getElementById('sponsor-later');
+            const linkBtn = document.getElementById('sponsor-link');
+            
+            const status = document.getElementById('debug-status');
+            status.innerHTML = '';
+            
+            // Check each element
+            const elements = [
+                { name: 'sponsor-popup', element: popup },
+                { name: 'sponsor-backdrop', element: backdrop },
+                { name: 'sponsor-close', element: closeBtn },
+                { name: 'sponsor-later', element: laterBtn },
+                { name: 'sponsor-link', element: linkBtn }
+            ];
+            
+            elements.forEach(({ name, element }) => {
+                const div = document.createElement('div');
+                div.className = `status ${element ? 'success' : 'error'}`;
+                div.textContent = `${element ? '✅' : '❌'} ${name}: ${element ? 'Found' : 'Not found'}`;
+                status.appendChild(div);
+            });
+            
+            // Check localStorage
+            const dismissed = localStorage.getItem('sponsor_dismissed');
+            const div = document.createElement('div');
+            div.className = `status ${dismissed ? 'error' : 'success'}`;
+            div.textContent = `${dismissed ? '❌' : '✅'} localStorage: ${dismissed ? 'Dismissed' : 'Not dismissed'}`;
+            status.appendChild(div);
+            
+            // Check CSS classes
+            if (popup) {
+                const div = document.createElement('div');
+                div.className = 'status info';
+                div.textContent = `📋 Popup classes: ${popup.className}`;
+                status.appendChild(div);
+            }
+        }
+        
+        // Auto-check on load
+        setTimeout(checkElements, 1000);
+        
+        // Override delay for testing
+        if (window.sponsorPopup) {
+            window.sponsorPopup.options.showDelay = 3000; // 3 seconds for testing
+        }
+    </script>
+</body>
+</html>
