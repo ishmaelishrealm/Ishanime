@@ -77,55 +77,26 @@ async function testAllThumbnails() {
     }
 }
 
-// Individual playback functions
+// Simple video playback function
 function playDirectVideo(episode) {
     const videoPlayer = document.getElementById('videoPlayer');
     const videoContainer = document.getElementById('videoContainer');
     
     // Clear any existing iframe
     const existingIframe = videoContainer.querySelector('iframe');
-    if (existingIframe) {
-        existingIframe.remove();
-    }
+    if (existingIframe) existingIframe.remove();
     
     // Clear background image
-    if (videoContainer) {
-        videoContainer.style.backgroundImage = 'none';
-    }
+    if (videoContainer) videoContainer.style.backgroundImage = 'none';
     
     // Show video player
     videoPlayer.style.display = 'block';
-    videoPlayer.style.width = '100%';
-    videoPlayer.style.height = '100%';
     
-    // Try different MP4 qualities - use the correct Bunny CDN format
-    const mp4Urls = [
-        { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_1080p.mp4`, quality: '1080p' },
-        { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_720p.mp4`, quality: '720p' },
-        { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_480p.mp4`, quality: '480p' },
-        { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play.mp4`, quality: 'default' }
-    ];
-    
-    console.log('🔍 Available MP4 URLs:', mp4Urls);
-    console.log('🎬 Episode ID:', episode.id);
-    
-    for (const mp4 of mp4Urls) {
-        if (mp4.url) {
-            console.log(`🎬 Trying Direct MP4 ${mp4.quality}:`, mp4.url);
-            videoPlayer.src = mp4.url;
-            
-            // Add event listeners for debugging
-            videoPlayer.onloadstart = () => console.log(`✅ ${mp4.quality} started loading`);
-            videoPlayer.oncanplay = () => console.log(`✅ ${mp4.quality} can play`);
-            videoPlayer.onerror = (e) => console.log(`❌ ${mp4.quality} error:`, e);
-            
-            // URL testing removed to prevent glitching
-            return true;
-        }
-    }
-    
-    console.log('❌ No direct MP4 URLs available');
-    return false;
+    // Try direct MP4 (720p first, then fallback)
+    const mp4Url = `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_720p.mp4`;
+    videoPlayer.src = mp4Url;
+    console.log('🎬 Loading direct MP4:', mp4Url);
+    return true;
 }
 
 // Test if video URL is accessible (simplified to prevent glitching)
@@ -216,34 +187,18 @@ function playHLSVideo(episode) {
     
     // Clear any existing iframe
     const existingIframe = videoContainer.querySelector('iframe');
-    if (existingIframe) {
-        existingIframe.remove();
-    }
+    if (existingIframe) existingIframe.remove();
     
     // Clear background image
-    if (videoContainer) {
-        videoContainer.style.backgroundImage = 'none';
-    }
+    if (videoContainer) videoContainer.style.backgroundImage = 'none';
     
     // Show video player
     videoPlayer.style.display = 'block';
-    videoPlayer.style.width = '100%';
-    videoPlayer.style.height = '100%';
     
-    // Use the correct HLS URL format
+    // Use HLS URL
     const hlsUrl = `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/playlist.m3u8`;
-    
-    console.log('🎬 HLS Stream:', hlsUrl);
-    console.log('🎬 Episode ID:', episode.id);
-    
     videoPlayer.src = hlsUrl;
-    
-    // Add event listeners for debugging
-    videoPlayer.onloadstart = () => console.log('✅ HLS started loading');
-    videoPlayer.oncanplay = () => console.log('✅ HLS can play');
-    videoPlayer.onerror = (e) => console.log('❌ HLS error:', e);
-    
-    // URL testing removed to prevent glitching
+    console.log('🎬 Loading HLS:', hlsUrl);
     return true;
 }
 
@@ -251,60 +206,23 @@ function playIframeVideo(episode) {
     const videoPlayer = document.getElementById('videoPlayer');
     const videoContainer = document.getElementById('videoContainer');
     
-    // Clear any existing iframe first
+    // Clear any existing iframe
     const existingIframe = videoContainer.querySelector('iframe');
-    if (existingIframe) {
-        existingIframe.remove();
-    }
-    
-    // Use the correct iframe URL format
-    const iframeUrl = `https://iframe.mediadelivery.net/play/506159/${episode.id}`;
-    
-    console.log('🎬 Iframe Player (Default):', iframeUrl);
-    console.log('🎬 Episode ID:', episode.id);
-    
-    const iframe = document.createElement('iframe');
-    iframe.id = 'bunnyIframe';
-    iframe.src = iframeUrl;
-    iframe.style.cssText = `
-        width: 100%;
-        height: 100%;
-        border: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 10;
-    `;
-    iframe.allowFullscreen = true;
-    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
-    iframe.setAttribute('loading', 'lazy');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
+    if (existingIframe) existingIframe.remove();
     
     // Hide video player and show iframe
     videoPlayer.style.display = 'none';
     
-    // Set background image for the container
-    if (videoContainer) {
-        videoContainer.style.backgroundImage = `url('/assets/ishanime-logo.png')`;
-        videoContainer.style.backgroundSize = 'contain';
-        videoContainer.style.backgroundRepeat = 'no-repeat';
-        videoContainer.style.backgroundPosition = 'center';
-    }
+    // Create iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://iframe.mediadelivery.net/play/506159/${episode.id}`;
+    iframe.style.cssText = 'width: 100%; height: 100%; border: none;';
+    iframe.allowFullscreen = true;
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
     
     // Add iframe to container
     videoContainer.appendChild(iframe);
-    
-    // Add load event listener
-    iframe.onload = function() {
-        console.log('✅ Iframe loaded successfully');
-    };
-    
-    iframe.onerror = function() {
-        console.log('❌ Iframe failed to load');
-    };
-    
-    // URL testing removed to prevent glitching
+    console.log('🎬 Loading iframe:', iframe.src);
     return true;
 }
 
@@ -957,25 +875,9 @@ function selectEpisode(index) {
         videoPlayer.src = '';
         videoPlayer.style.display = 'block';
         
-        // Try different video sources in order of preference
-        if (episode.directMp4_1080p) {
-            // Use HTML5 video for direct MP4 1080p
-            videoPlayer.src = episode.directMp4_1080p;
-            console.log('🎬 Switching to direct MP4 1080p:', episode.directMp4_1080p);
-        } else if (episode.directMp4) {
-            // Use HTML5 video for direct MP4 720p
-            videoPlayer.src = episode.directMp4;
-            console.log('🎬 Switching to direct MP4 720p:', episode.directMp4);
-        } else if (episode.directMp4_480p) {
-            // Use HTML5 video for direct MP4 480p
-            videoPlayer.src = episode.directMp4_480p;
-            console.log('🎬 Switching to direct MP4 480p:', episode.directMp4_480p);
-        } else if (episode.hlsUrl) {
-            // Use HTML5 video for HLS
-            videoPlayer.src = episode.hlsUrl;
-            console.log('🎬 Switching to HLS:', episode.hlsUrl);
-        } else if (episode.videoUrl) {
-            // Use iframe for Bunny CDN iframe URLs
+        // Simple video loading - try iframe first (most reliable)
+        if (episode.videoUrl) {
+            // Use iframe for Bunny CDN (most reliable)
             const iframe = document.createElement('iframe');
             iframe.src = episode.videoUrl;
             iframe.style.width = '100%';
@@ -987,7 +889,11 @@ function selectEpisode(index) {
             
             videoPlayer.style.display = 'none';
             videoContainer.appendChild(iframe);
-            console.log('🎬 Switching to iframe:', episode.videoUrl);
+            console.log('🎬 Loading iframe video:', episode.videoUrl);
+        } else {
+            // Fallback to direct MP4
+            videoPlayer.src = episode.directMp4 || episode.directMp4_720p || episode.directMp4_480p;
+            console.log('🎬 Loading direct MP4:', videoPlayer.src);
         }
         
         // Update episode list to show active episode

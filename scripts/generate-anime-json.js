@@ -182,14 +182,35 @@ async function main() {
         // Generate final JSON
         const animeJson = generateAnimeJson(animeData);
         
-        // Write to frontend directory
+        // Write to frontend directory with change detection
         const outputPath = path.join(__dirname, '..', 'frontend', 'anime.json');
-        fs.writeFileSync(outputPath, JSON.stringify(animeJson, null, 2));
         
-        console.log(`✅ Successfully generated anime.json with ${animeData.length} anime shows`);
-        console.log(`📁 Output: ${outputPath}`);
-        console.log(`📊 Total episodes: ${videos.length}`);
-        console.log(`🕒 Generated at: ${animeJson.timestamp}`);
+        // Check if file exists and compare content
+        let hasChanges = true;
+        if (fs.existsSync(outputPath)) {
+            try {
+                const existingData = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+                // Compare video count
+                if (existingData.count === animeJson.count && 
+                    existingData.data && 
+                    existingData.data.length === animeJson.data.length) {
+                    console.log('📊 No changes detected - same video count, skipping update');
+                    hasChanges = false;
+                }
+            } catch (e) {
+                console.log('📊 Could not compare existing file, proceeding with update');
+            }
+        }
+        
+        if (hasChanges) {
+            fs.writeFileSync(outputPath, JSON.stringify(animeJson, null, 2));
+            console.log(`✅ Successfully generated anime.json with ${animeData.length} anime shows`);
+            console.log(`📁 Output: ${outputPath}`);
+            console.log(`📊 Total episodes: ${videos.length}`);
+            console.log(`🕒 Generated at: ${animeJson.timestamp}`);
+        } else {
+            console.log('✅ No changes detected, file not updated');
+        }
         
     } catch (error) {
         console.error('❌ Failed to generate anime.json:', error);
