@@ -21,6 +21,49 @@ function toggleIframeFallback() {
         openPlayer(currentAnime.episodes[currentEpisodeIndex], currentAnime);
     }
 }
+
+// Test thumbnail URL accessibility
+async function testThumbnailUrl(url) {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        console.log(`🖼️ Thumbnail test: ${url} - Status: ${response.status}`);
+        return response.ok;
+    } catch (error) {
+        console.log(`❌ Thumbnail test failed: ${url} - Error: ${error.message}`);
+        return false;
+    }
+}
+
+// Force refresh all thumbnails
+function refreshThumbnails() {
+    console.log('🔄 Refreshing all thumbnails...');
+    const thumbnails = document.querySelectorAll('.show-thumbnail');
+    thumbnails.forEach(img => {
+        const originalSrc = img.src;
+        img.src = '';
+        img.src = originalSrc;
+        console.log(`🔄 Refreshed: ${originalSrc}`);
+    });
+}
+
+// Test all thumbnail URLs
+async function testAllThumbnails() {
+    console.log('🧪 Testing all thumbnail URLs...');
+    if (animeData.length === 0) {
+        console.log('❌ No anime data loaded');
+        return;
+    }
+    
+    for (const anime of animeData.slice(0, 3)) { // Test first 3 anime
+        const firstEpisode = anime.episodes?.[0];
+        if (firstEpisode) {
+            const thumbnail = firstEpisode.thumbnailPreview || firstEpisode.thumbnail;
+            if (thumbnail) {
+                await testThumbnailUrl(thumbnail);
+            }
+        }
+    }
+}
 // Revert to simple player logic (previous stable version)
 
 // Initialize the application
@@ -172,6 +215,20 @@ async function loadAnime() {
                 animeData = data.data;
                 console.log(`✅ Loaded ${animeData.length} anime shows from static JSON`);
                 console.log(`🕒 Last updated: ${data.timestamp}`);
+                
+                // Debug first anime to check thumbnail URLs
+                if (animeData.length > 0) {
+                    const firstAnime = animeData[0];
+                    console.log('🔍 First anime debug:', {
+                        title: firstAnime.title,
+                        episodes: firstAnime.episodes?.length || 0,
+                        firstEpisode: firstAnime.episodes?.[0] ? {
+                            thumbnail: firstAnime.episodes[0].thumbnail,
+                            thumbnailPreview: firstAnime.episodes[0].thumbnailPreview
+                        } : 'No episodes'
+                    });
+                }
+                
                 displayAnime(animeData);
             } else {
                 console.log('⚠️ No anime data in JSON, using demo data');
@@ -352,13 +409,25 @@ function createAnimeCard(anime) {
     card.className = 'show-card';
     card.onclick = () => openAnimeDetail(anime);
     
-    // Get the best available thumbnail
+    // Get the best available thumbnail with debugging
     const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
     const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || '/public/assets/ishanime-logo.png';
     
+    // Debug thumbnail URLs
+    console.log(`🖼️ Anime: ${anime.title}`);
+    console.log(`   Thumbnail Preview: ${firstEpisode?.thumbnailPreview || 'N/A'}`);
+    console.log(`   Thumbnail: ${firstEpisode?.thumbnail || 'N/A'}`);
+    console.log(`   Using: ${thumbnail}`);
+    
+    // Test thumbnail URL if it's from Bunny CDN
+    if (thumbnail.includes('b-cdn.net')) {
+        testThumbnailUrl(thumbnail);
+    }
+    
     card.innerHTML = `
         <img src="${thumbnail}" alt="${anime.title}" class="show-thumbnail" 
-             onerror="this.src='/public/assets/ishanime-logo.png'" 
+             onerror="console.log('❌ Thumbnail failed:', this.src); this.src='/public/assets/ishanime-logo.png'" 
+             onload="console.log('✅ Thumbnail loaded:', this.src)"
              loading="lazy">
         <div class="show-info">
             <h3 class="show-title">${anime.title}</h3>
