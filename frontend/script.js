@@ -7,6 +7,20 @@ let currentFilter = 'all';
 let currentAnime = null;
 let currentEpisodeIndex = 0;
 let isPlaying = false;
+
+// Player preferences
+let useIframeFallback = false; // Set to true to allow iframe fallback
+
+// Toggle iframe fallback function
+function toggleIframeFallback() {
+    useIframeFallback = !useIframeFallback;
+    console.log(`🔄 Iframe fallback ${useIframeFallback ? 'enabled' : 'disabled'}`);
+    
+    // Reload current episode with new settings
+    if (currentAnime && currentAnime.episodes && currentAnime.episodes[currentEpisodeIndex]) {
+        openPlayer(currentAnime.episodes[currentEpisodeIndex], currentAnime);
+    }
+}
 // Revert to simple player logic (previous stable version)
 
 // Initialize the application
@@ -385,35 +399,45 @@ function openPlayer(episode, anime) {
     videoPlayer.removeAttribute('src');
     videoPlayer.load();
     
-    // Try MP4s first (previous stable behavior), then HLS, then iframe
+    // Try MP4s first (previous stable behavior), then HLS, then iframe (if enabled)
     let started = false;
+    let currentMethod = '';
+    
+    // Test direct MP4 1080p
     if (episode.directMp4_1080p) {
         videoPlayer.src = episode.directMp4_1080p;
         videoPlayer.style.display = 'block';
-        console.log('🎬 Using direct MP4 1080p:', episode.directMp4_1080p);
+        currentMethod = 'Direct MP4 1080p';
+        console.log('🎬 Attempting direct MP4 1080p:', episode.directMp4_1080p);
         started = true;
     }
+    // Test direct MP4 720p
     if (!started && episode.directMp4) {
         videoPlayer.src = episode.directMp4;
         videoPlayer.style.display = 'block';
-        console.log('🎬 Using direct MP4 720p:', episode.directMp4);
+        currentMethod = 'Direct MP4 720p';
+        console.log('🎬 Attempting direct MP4 720p:', episode.directMp4);
         started = true;
     }
+    // Test direct MP4 480p
     if (!started && episode.directMp4_480p) {
         videoPlayer.src = episode.directMp4_480p;
         videoPlayer.style.display = 'block';
-        console.log('🎬 Using direct MP4 480p:', episode.directMp4_480p);
+        currentMethod = 'Direct MP4 480p';
+        console.log('🎬 Attempting direct MP4 480p:', episode.directMp4_480p);
         started = true;
     }
+    // Test HLS
     if (!started && episode.hlsUrl) {
         videoPlayer.src = episode.hlsUrl;
         videoPlayer.style.display = 'block';
-        console.log('🎬 Using HLS:', episode.hlsUrl);
+        currentMethod = 'HLS Stream';
+        console.log('🎬 Attempting HLS:', episode.hlsUrl);
         started = true;
     }
 
-    // Finally, fallback to iframe (only if direct streaming fails)
-    if (!started && episode.videoUrl) {
+    // Finally, fallback to iframe (only if enabled and direct streaming fails)
+    if (!started && episode.videoUrl && useIframeFallback) {
         // Use iframe for Bunny CDN iframe URLs
         const iframe = document.createElement('iframe');
         iframe.src = episode.videoUrl;
@@ -429,12 +453,29 @@ function openPlayer(episode, anime) {
         
         videoPlayer.style.display = 'none';
         videoPlayer.parentNode.appendChild(iframe);
-        console.log('🎬 Using iframe fallback:', episode.videoUrl);
+        console.log('🎬 Using iframe fallback (iframe enabled):', episode.videoUrl);
         started = true;
-    } else {
-        // Attach error fallback: if MP4/HLS fails, switch to iframe automatically
+    } else if (!started) {
+        console.log('❌ No video source available. Enable iframe fallback or check video URLs.');
+        // Show error message to user
+        videoPlayer.style.display = 'none';
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'padding: 20px; text-align: center; color: #ff6b6b; background: #ffe0e0; border-radius: 8px; margin: 20px;';
+        errorDiv.innerHTML = `
+            <h3>Video Not Available</h3>
+            <p>Direct streaming failed. ${useIframeFallback ? 'Iframe fallback also failed.' : 'Enable iframe fallback in settings.'}</p>
+            <button onclick="toggleIframeFallback()" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                ${useIframeFallback ? 'Disable' : 'Enable'} Iframe Fallback
+            </button>
+        `;
+        videoPlayer.parentNode.appendChild(errorDiv);
+    }
+    
+    // Attach error fallback: if MP4/HLS fails, show error or switch to iframe (if enabled)
+    if (started) {
         videoPlayer.onerror = () => {
-            if (episode.videoUrl && !videoPlayer.parentNode.querySelector('iframe')) {
+            console.log(`❌ ${currentMethod} failed to load`);
+            if (useIframeFallback && episode.videoUrl && !videoPlayer.parentNode.querySelector('iframe')) {
                 const ifr = document.createElement('iframe');
                 ifr.src = episode.videoUrl;
                 ifr.style.width = '100%';
@@ -448,7 +489,14 @@ function openPlayer(episode, anime) {
                 videoPlayer.style.display = 'none';
                 videoPlayer.parentNode.appendChild(ifr);
                 console.log('⚠️ Fallback to iframe due to playback error');
+            } else {
+                console.log('❌ No iframe fallback available (disabled)');
             }
+        };
+        
+        // Success handler
+        videoPlayer.onloadstart = () => {
+            console.log(`✅ ${currentMethod} started loading successfully`);
         };
     }
     
