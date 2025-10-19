@@ -10,7 +10,7 @@ let isPlaying = false;
 
 // Player preferences
 let useIframeFallback = false; // Set to true to allow iframe fallback
-let playerMode = 'auto'; // 'auto', 'direct', 'hls', 'iframe'
+let playerMode = 'iframe'; // 'auto', 'direct', 'hls', 'iframe' - iframe is default
 
 // Toggle iframe fallback function
 function toggleIframeFallback() {
@@ -27,6 +27,12 @@ function toggleIframeFallback() {
 function setPlayerMode(mode) {
     playerMode = mode;
     console.log(`🎮 Player mode changed to: ${mode}`);
+    
+    // Show/hide iframe controls
+    const iframeControls = document.getElementById('iframeControls');
+    if (iframeControls) {
+        iframeControls.style.display = mode === 'iframe' ? 'block' : 'none';
+    }
     
     // Reload current episode with new mode
     if (currentAnime && currentAnime.episodes && currentAnime.episodes[currentEpisodeIndex]) {
@@ -183,9 +189,10 @@ function playIframeVideo(episode) {
     // Use the correct iframe URL format
     const iframeUrl = `https://iframe.mediadelivery.net/play/506159/${episode.id}`;
     
-    console.log('🎬 Iframe Player:', iframeUrl);
+    console.log('🎬 Iframe Player (Default):', iframeUrl);
     
     const iframe = document.createElement('iframe');
+    iframe.id = 'bunnyIframe';
     iframe.src = iframeUrl;
     iframe.style.width = '100%';
     iframe.style.height = '100%';
@@ -213,9 +220,47 @@ function playIframeVideo(episode) {
     
     videoPlayer.parentNode.appendChild(iframe);
     
+    // Try to add some control integration (limited due to CORS)
+    setupIframeControls(iframe);
+    
     // Test if URL is accessible
     testVideoUrl(iframeUrl, 'Iframe');
     return true;
+}
+
+// Setup iframe controls (limited functionality due to CORS)
+function setupIframeControls(iframe) {
+    // Store reference to current iframe
+    window.currentIframe = iframe;
+    
+    // Try to add keyboard controls
+    document.addEventListener('keydown', function(e) {
+        if (window.currentIframe && iframe.style.display !== 'none') {
+            // Send keyboard events to iframe (may not work due to CORS)
+            try {
+                iframe.contentWindow.postMessage({
+                    type: 'keydown',
+                    key: e.key,
+                    code: e.code
+                }, '*');
+            } catch (err) {
+                // CORS prevents this, but we try anyway
+                console.log('Cannot send keyboard events to iframe (CORS)');
+            }
+        }
+    });
+    
+    // Add click-to-play functionality
+    iframe.addEventListener('load', function() {
+        console.log('✅ Iframe loaded successfully');
+        
+        // Try to focus the iframe for keyboard controls
+        try {
+            iframe.focus();
+        } catch (err) {
+            console.log('Cannot focus iframe (CORS)');
+        }
+    });
 }
 
 // Add player mode selector to the player section
@@ -246,21 +291,116 @@ function addPlayerModeSelector() {
                 border-radius: 4px;
                 padding: 5px;
                 font-size: 12px;
+                margin-bottom: 10px;
             ">
                 <option value="auto">Auto</option>
                 <option value="direct">Direct MP4</option>
                 <option value="hls">HLS Stream</option>
-                <option value="iframe">Iframe</option>
+                <option value="iframe" selected>Iframe (Default)</option>
             </select>
+            <div id="iframeControls" style="display: none;">
+                <button onclick="iframePlayPause()" style="
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 5px 10px;
+                    margin: 2px;
+                    font-size: 11px;
+                    cursor: pointer;
+                ">⏯️ Play/Pause</button>
+                <button onclick="iframeMute()" style="
+                    background: #2196F3;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 5px 10px;
+                    margin: 2px;
+                    font-size: 11px;
+                    cursor: pointer;
+                ">🔇 Mute</button>
+                <button onclick="iframeFullscreen()" style="
+                    background: #FF9800;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 5px 10px;
+                    margin: 2px;
+                    font-size: 11px;
+                    cursor: pointer;
+                ">⛶ Fullscreen</button>
+            </div>
         `;
         
         playerSection.appendChild(selector);
     }
     
-    // Set current mode
+    // Set current mode and show/hide controls
     const select = document.getElementById('playerModeSelect');
+    const iframeControls = document.getElementById('iframeControls');
     if (select) {
         select.value = playerMode;
+    }
+    if (iframeControls) {
+        iframeControls.style.display = playerMode === 'iframe' ? 'block' : 'none';
+    }
+}
+
+// Iframe control functions (limited due to CORS)
+function iframePlayPause() {
+    const iframe = document.getElementById('bunnyIframe');
+    if (iframe) {
+        try {
+            // Try to send space key to iframe for play/pause
+            iframe.contentWindow.postMessage({
+                type: 'keydown',
+                key: ' ',
+                code: 'Space'
+            }, '*');
+            console.log('🎮 Sent play/pause command to iframe');
+        } catch (err) {
+            console.log('❌ Cannot control iframe (CORS restriction)');
+            // Fallback: click on iframe to focus it
+            iframe.click();
+        }
+    }
+}
+
+function iframeMute() {
+    const iframe = document.getElementById('bunnyIframe');
+    if (iframe) {
+        try {
+            // Try to send 'm' key to iframe for mute
+            iframe.contentWindow.postMessage({
+                type: 'keydown',
+                key: 'm',
+                code: 'KeyM'
+            }, '*');
+            console.log('🎮 Sent mute command to iframe');
+        } catch (err) {
+            console.log('❌ Cannot control iframe (CORS restriction)');
+        }
+    }
+}
+
+function iframeFullscreen() {
+    const iframe = document.getElementById('bunnyIframe');
+    if (iframe) {
+        try {
+            // Try to send 'f' key to iframe for fullscreen
+            iframe.contentWindow.postMessage({
+                type: 'keydown',
+                key: 'f',
+                code: 'KeyF'
+            }, '*');
+            console.log('🎮 Sent fullscreen command to iframe');
+        } catch (err) {
+            console.log('❌ Cannot control iframe (CORS restriction)');
+            // Fallback: try to make iframe fullscreen
+            if (iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+            }
+        }
     }
 }
 // Revert to simple player logic (previous stable version)
