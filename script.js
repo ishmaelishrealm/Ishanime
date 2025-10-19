@@ -1,7 +1,8 @@
 // Configuration
-// 🚀 Using Static JSON - Fastest, most reliable approach!
-// Pre-generated anime.json updated every 5 minutes via GitHub Actions
-const ANIME_JSON_URL = 'data/anime.json'; // ✅ Static JSON file
+// 🚀 Using Static JSON with CDN Fallback - Fastest, most reliable approach!
+// Pre-generated anime.json updated every 2 hours via GitHub Actions
+const LOCAL_ANIME_URL = 'data/anime.json';     // Primary: Local data
+const CDN_ANIME_URL = 'cdn/latest-anime.json'; // Fallback: CDN cached version
 let animeData = [];
 let currentFilter = 'all';
 let currentAnime = null;
@@ -343,8 +344,8 @@ async function checkBackendStatus() {
     
     try {
         console.log('🔍 Testing static JSON availability...');
-        console.log('🌐 JSON URL:', ANIME_JSON_URL);
-        const response = await fetch(ANIME_JSON_URL);
+        console.log('🌐 JSON URL:', LOCAL_ANIME_URL);
+        const response = await fetch(LOCAL_ANIME_URL);
         console.log('📡 JSON response status:', response.status);
         
         if (response.ok) {
@@ -432,49 +433,71 @@ function updateSiteBranding(config) {
 }
 
 // Load anime from static JSON
+// Clean anime data fetching with CDN fallback
+async function fetchAnimeData() {
+    try {
+        // Try local data first
+        console.log('📡 Fetching anime data from local JSON...');
+        const localResponse = await fetch(LOCAL_ANIME_URL);
+        
+        if (localResponse.ok) {
+            const data = await localResponse.json();
+            console.log('✅ Loaded anime data from /data/anime.json');
+            return data.data || [];
+        } else {
+            throw new Error(`Local JSON not found (${localResponse.status})`);
+        }
+    } catch (error) {
+        console.warn('⚠️ Fallback to CDN:', error.message);
+        
+        try {
+            // Fallback to CDN
+            const cdnResponse = await fetch(CDN_ANIME_URL);
+            if (!cdnResponse.ok) {
+                throw new Error(`CDN JSON not found (${cdnResponse.status})`);
+            }
+            
+            const data = await cdnResponse.json();
+            console.log('✅ Loaded fallback data from /cdn/latest-anime.json');
+            return data.data || [];
+        } catch (cdnError) {
+            console.error('❌ Both local and CDN data failed:', cdnError);
+            throw new Error('Unable to load anime data from any source');
+        }
+    }
+}
+
+// Load anime data with fallback system
 async function loadAnime() {
     showLoading();
     
     try {
-        console.log('🔄 Loading anime from static JSON...');
-        console.log('🌐 JSON URL:', ANIME_JSON_URL);
-        const response = await fetch(ANIME_JSON_URL);
-        console.log('📡 JSON response status:', response.status);
+        const data = await fetchAnimeData();
         
-        if (response.ok) {
-            const data = await response.json();
-            console.log('📊 JSON response data:', data);
+        if (data && Array.isArray(data) && data.length > 0) {
+            animeData = data;
+            console.log(`📊 Loaded ${animeData.length} anime shows`);
             
-            if (data.success && data.data && data.data.length > 0) {
-                animeData = data.data;
-                console.log(`✅ Loaded ${animeData.length} anime shows from static JSON`);
-                console.log(`🕒 Last updated: ${data.timestamp}`);
-                
-                // Debug first anime to check thumbnail URLs
-                if (animeData.length > 0) {
-                    const firstAnime = animeData[0];
-                    console.log('🔍 First anime debug:', {
-                        title: firstAnime.title,
-                        episodes: firstAnime.episodes?.length || 0,
-                        firstEpisode: firstAnime.episodes?.[0] ? {
-                            thumbnail: firstAnime.episodes[0].thumbnail,
-                            thumbnailPreview: firstAnime.episodes[0].thumbnailPreview
-                        } : 'No episodes'
-                    });
-                }
-                
-                displayAnime(animeData);
-            } else {
-                console.log('⚠️ No anime data in JSON, using demo data');
-                loadDemoAnime();
+            // Debug first anime to check thumbnail URLs
+            if (animeData.length > 0) {
+                const firstAnime = animeData[0];
+                console.log('🔍 First anime debug:', {
+                    title: firstAnime.title,
+                    episodes: firstAnime.episodes?.length || 0,
+                    firstEpisode: firstAnime.episodes?.[0] ? {
+                        thumbnail: firstAnime.episodes[0].thumbnail,
+                        thumbnailPreview: firstAnime.episodes[0].thumbnailPreview
+                    } : 'No episodes'
+                });
             }
+            
+            displayAnime(animeData);
         } else {
-            console.log('❌ JSON request failed, using demo data');
+            console.log('⚠️ No anime data found, using demo data');
             loadDemoAnime();
         }
     } catch (error) {
-        console.error('❌ Failed to load anime from static JSON:', error);
-        console.error('❌ Error details:', error.message);
+        console.error('❌ Failed to load anime data:', error);
         
         // Show user-friendly error message
         const statusElement = document.getElementById('backendStatus');
@@ -482,11 +505,12 @@ async function loadAnime() {
             statusElement.innerHTML = `
                 <div class="status-content">
                     <div class="status-icon">❌</div>
-                    <p>Static JSON load failed: ${error.message}</p>
-                    <p>Check if anime.json exists and is accessible</p>
+                    <div class="status-text">
+                        <div class="status-title">Backend not connected</div>
+                        <div class="status-subtitle">Using demo mode</div>
+                    </div>
                 </div>
             `;
-            statusElement.style.display = 'block';
         }
         
         loadDemoAnime();
@@ -666,6 +690,7 @@ function createAnimeCard(anime) {
         <div class="show-info">
             <h3 class="show-title">${anime.title}</h3>
             <p class="show-episodes">${anime.episodes ? anime.episodes.length : 0} episodes</p>
+            <button class="play-btn" onclick="playAnime('${anime.id}')">▶ Watch</button>
         </div>
     `;
     
@@ -1159,5 +1184,23 @@ window.addEventListener('resize', function() {
 });
 
 // Service worker disabled to prevent potential reload loops during development
+
+// Simple play handler for anime cards
+function playAnime(id) {
+    const anime = animeData.find(a => a.id === id);
+    if (!anime) {
+        console.error('❌ Anime not found:', id);
+        return alert('Anime not found');
+    }
+    
+    const firstEpisode = anime.episodes[0];
+    if (!firstEpisode) {
+        console.error('❌ No episodes found for anime:', anime.title);
+        return alert('No episodes available');
+    }
+    
+    console.log('🎬 Playing anime:', anime.title, 'Episode:', firstEpisode.episode);
+    openPlayer(firstEpisode, anime);
+}
 
 // Sponsorship popup is now handled by sponsor/sponsor.js

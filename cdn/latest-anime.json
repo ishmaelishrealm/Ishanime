@@ -1,7 +1,11 @@
 {
-  "lastSync": "2024-01-19T00:00:00Z",
-  "source": "data/anime.json",
+  "success": true,
+  "timestamp": "2024-01-19T00:00:00Z",
+  "count": 0,
+  "data": [],
+  "source": "cdn-fallback",
   "cdnUrl": "https://vz-a01fffb9-e7a.b-cdn.net",
-  "status": "active",
-  "version": "1.0.0"
+  "status": "fallback",
+  "version": "1.0.0",
+  "note": "This is a fallback file. Real data should come from data/anime.json"
 }

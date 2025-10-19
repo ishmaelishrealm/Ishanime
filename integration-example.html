@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Example - Ishrealm Anime</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Example-specific styles */
+        .example-header {
+            text-align: center;
+            padding: 2rem;
+            border-bottom: 2px solid #ff2e97;
+            margin-bottom: 2rem;
+        }
+        
+        .example-info {
+            background: #1a1a2e;
+            border: 1px solid #ff2e97;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .code-block {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="example-header">
+        <img src="assets/ishanime-logo.png" alt="Ishrealm Logo" class="logo" style="height: 50px;">
+        <h1>Integration Example</h1>
+        <p>Clean anime data fetching with CDN fallback</p>
+    </header>
+
+    <main class="container">
+        <div class="example-info">
+            <h3>📋 How This Works</h3>
+            <p>This example demonstrates the clean integration pattern:</p>
+            <ul>
+                <li><strong>Primary:</strong> Fetches from <code>data/anime.json</code></li>
+                <li><strong>Fallback:</strong> Uses <code>cdn/latest-anime.json</code> if primary fails</li>
+                <li><strong>Error Handling:</strong> Shows demo data if both fail</li>
+                <li><strong>Simple Play:</strong> Direct anime playback with one click</li>
+            </ul>
+        </div>
+
+        <div class="example-info">
+            <h3>🔧 Integration Code</h3>
+            <div class="code-block">
+// Clean anime data fetching with CDN fallback
+async function fetchAnimeData() {
+  try {
+    // Try local data first
+    const localResponse = await fetch('data/anime.json');
+    if (localResponse.ok) {
+      const data = await localResponse.json();
+      return data.data || [];
+    }
+  } catch (error) {
+    // Fallback to CDN
+    const cdnResponse = await fetch('cdn/latest-anime.json');
+    const data = await cdnResponse.json();
+    return data.data || [];
+  }
+}
+
+// Simple play handler
+function playAnime(id) {
+  const anime = animeData.find(a => a.id === id);
+  const firstEpisode = anime.episodes[0];
+  openPlayer(firstEpisode, anime);
+}
+            </div>
+        </div>
+
+        <div id="anime-list" class="anime-grid">
+            <!-- Anime cards will be loaded here -->
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let animeData = [];
+
+        // Clean anime data fetching with CDN fallback
+        async function fetchAnimeData() {
+            try {
+                // Try local data first
+                console.log('📡 Fetching anime data from local JSON...');
+                const localResponse = await fetch('data/anime.json');
+                
+                if (localResponse.ok) {
+                    const data = await localResponse.json();
+                    console.log('✅ Loaded anime data from /data/anime.json');
+                    return data.data || [];
+                } else {
+                    throw new Error(`Local JSON not found (${localResponse.status})`);
+                }
+            } catch (error) {
+                console.warn('⚠️ Fallback to CDN:', error.message);
+                
+                try {
+                    // Fallback to CDN
+                    const cdnResponse = await fetch('cdn/latest-anime.json');
+                    if (!cdnResponse.ok) {
+                        throw new Error(`CDN JSON not found (${cdnResponse.status})`);
+                    }
+                    
+                    const data = await cdnResponse.json();
+                    console.log('✅ Loaded fallback data from /cdn/latest-anime.json');
+                    return data.data || [];
+                } catch (cdnError) {
+                    console.error('❌ Both local and CDN data failed:', cdnError);
+                    throw new Error('Unable to load anime data from any source');
+                }
+            }
+        }
+
+        // Renders anime cards
+        function renderAnimeList(animeList) {
+            const container = document.getElementById('anime-list');
+            container.innerHTML = '';
+
+            if (!animeList || animeList.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #888;">No anime data available</p>';
+                return;
+            }
+
+            animeList.forEach(anime => {
+                const card = document.createElement('div');
+                card.className = 'show-card';
+                
+                const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
+                const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishanime-logo.png';
+                
+                card.innerHTML = `
+                    <img src="${thumbnail}" alt="${anime.title}" class="show-thumbnail" 
+                         onerror="this.src='assets/ishanime-logo.png'"
+                         loading="lazy">
+                    <div class="show-info">
+                        <h3 class="show-title">${anime.title}</h3>
+                        <p class="show-episodes">${anime.episodes ? anime.episodes.length : 0} Episodes</p>
+                        <button class="play-btn" onclick="playAnime('${anime.id}')">▶ Watch</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Simple play handler
+        function playAnime(id) {
+            const anime = animeData.find(a => a.id === id);
+            if (!anime) {
+                console.error('❌ Anime not found:', id);
+                return alert('Anime not found');
+            }
+            
+            const firstEpisode = anime.episodes[0];
+            if (!firstEpisode) {
+                console.error('❌ No episodes found for anime:', anime.title);
+                return alert('No episodes available');
+            }
+            
+            console.log('🎬 Playing anime:', anime.title, 'Episode:', firstEpisode.episode);
+            
+            // For this example, just show the video URL
+            alert(`Would play: ${anime.title}\nEpisode: ${firstEpisode.episode}\nURL: ${firstEpisode.videoUrl || 'No URL available'}`);
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await fetchAnimeData();
+                animeData = data;
+                renderAnimeList(animeData);
+            } catch (error) {
+                console.error('❌ Failed to load anime data:', error);
+                document.getElementById('anime-list').innerHTML = 
+                    '<p style="text-align: center; color: #ff6b6b;">Failed to load anime data</p>';
+            }
+        });
+    </script>
+</body>
+</html>

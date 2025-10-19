@@ -636,4 +636,23 @@ body {
     
 }
 
+/* Play button styles */
+.play-btn {
+    background: linear-gradient(90deg, #ff2e97, #ff6ba9);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.play-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 46, 151, 0.4);
+}
+
 /* Sponsorship popup styles are now in sponsor/sponsor.css */
