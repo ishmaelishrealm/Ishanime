@@ -10,6 +10,7 @@ let isPlaying = false;
 
 // Player preferences
 let useIframeFallback = false; // Set to true to allow iframe fallback
+let playerMode = 'auto'; // 'auto', 'direct', 'hls', 'iframe'
 
 // Toggle iframe fallback function
 function toggleIframeFallback() {
@@ -17,6 +18,17 @@ function toggleIframeFallback() {
     console.log(`🔄 Iframe fallback ${useIframeFallback ? 'enabled' : 'disabled'}`);
     
     // Reload current episode with new settings
+    if (currentAnime && currentAnime.episodes && currentAnime.episodes[currentEpisodeIndex]) {
+        openPlayer(currentAnime.episodes[currentEpisodeIndex], currentAnime);
+    }
+}
+
+// Change player mode
+function setPlayerMode(mode) {
+    playerMode = mode;
+    console.log(`🎮 Player mode changed to: ${mode}`);
+    
+    // Reload current episode with new mode
     if (currentAnime && currentAnime.episodes && currentAnime.episodes[currentEpisodeIndex]) {
         openPlayer(currentAnime.episodes[currentEpisodeIndex], currentAnime);
     }
@@ -62,6 +74,116 @@ async function testAllThumbnails() {
                 await testThumbnailUrl(thumbnail);
             }
         }
+    }
+}
+
+// Individual playback functions
+function playDirectVideo(episode) {
+    const videoPlayer = document.getElementById('videoPlayer');
+    
+    // Try different MP4 qualities
+    const mp4Urls = [
+        { url: episode.directMp4_1080p, quality: '1080p' },
+        { url: episode.directMp4, quality: '720p' },
+        { url: episode.directMp4_480p, quality: '480p' }
+    ];
+    
+    for (const mp4 of mp4Urls) {
+        if (mp4.url) {
+            videoPlayer.src = mp4.url;
+            videoPlayer.style.display = 'block';
+            console.log(`🎬 Direct MP4 ${mp4.quality}:`, mp4.url);
+            return true;
+        }
+    }
+    
+    console.log('❌ No direct MP4 URLs available');
+    return false;
+}
+
+function playHLSVideo(episode) {
+    const videoPlayer = document.getElementById('videoPlayer');
+    
+    if (episode.hlsUrl) {
+        videoPlayer.src = episode.hlsUrl;
+        videoPlayer.style.display = 'block';
+        console.log('🎬 HLS Stream:', episode.hlsUrl);
+        return true;
+    }
+    
+    console.log('❌ No HLS URL available');
+    return false;
+}
+
+function playIframeVideo(episode) {
+    const videoPlayer = document.getElementById('videoPlayer');
+    
+    if (episode.videoUrl) {
+        const iframe = document.createElement('iframe');
+        iframe.src = episode.videoUrl;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.allowFullscreen = true;
+        iframe.allow = 'autoplay; fullscreen';
+        iframe.setAttribute('loading', 'lazy');
+        
+        videoPlayer.style.display = 'none';
+        videoPlayer.parentNode.appendChild(iframe);
+        console.log('🎬 Iframe Player:', episode.videoUrl);
+        return true;
+    }
+    
+    console.log('❌ No iframe URL available');
+    return false;
+}
+
+// Add player mode selector to the player section
+function addPlayerModeSelector() {
+    const playerSection = document.getElementById('playerSection');
+    let selector = document.getElementById('playerModeSelector');
+    
+    if (!selector) {
+        selector = document.createElement('div');
+        selector.id = 'playerModeSelector';
+        selector.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+        `;
+        
+        selector.innerHTML = `
+            <label style="display: block; margin-bottom: 5px; font-size: 12px;">Player Mode:</label>
+            <select id="playerModeSelect" onchange="setPlayerMode(this.value)" style="
+                background: #333;
+                color: white;
+                border: 1px solid #555;
+                border-radius: 4px;
+                padding: 5px;
+                font-size: 12px;
+            ">
+                <option value="auto">Auto</option>
+                <option value="direct">Direct MP4</option>
+                <option value="hls">HLS Stream</option>
+                <option value="iframe">Iframe</option>
+            </select>
+        `;
+        
+        playerSection.appendChild(selector);
+    }
+    
+    // Set current mode
+    const select = document.getElementById('playerModeSelect');
+    if (select) {
+        select.value = playerMode;
     }
 }
 // Revert to simple player logic (previous stable version)
@@ -468,104 +590,56 @@ function openPlayer(episode, anime) {
     videoPlayer.removeAttribute('src');
     videoPlayer.load();
     
-    // Try MP4s first (previous stable behavior), then HLS, then iframe (if enabled)
+    // Add player mode selector if not exists
+    addPlayerModeSelector();
+    
     let started = false;
     let currentMethod = '';
     
-    // Test direct MP4 1080p
-    if (episode.directMp4_1080p) {
-        videoPlayer.src = episode.directMp4_1080p;
-        videoPlayer.style.display = 'block';
-        currentMethod = 'Direct MP4 1080p';
-        console.log('🎬 Attempting direct MP4 1080p:', episode.directMp4_1080p);
-        started = true;
-    }
-    // Test direct MP4 720p
-    if (!started && episode.directMp4) {
-        videoPlayer.src = episode.directMp4;
-        videoPlayer.style.display = 'block';
-        currentMethod = 'Direct MP4 720p';
-        console.log('🎬 Attempting direct MP4 720p:', episode.directMp4);
-        started = true;
-    }
-    // Test direct MP4 480p
-    if (!started && episode.directMp4_480p) {
-        videoPlayer.src = episode.directMp4_480p;
-        videoPlayer.style.display = 'block';
-        currentMethod = 'Direct MP4 480p';
-        console.log('🎬 Attempting direct MP4 480p:', episode.directMp4_480p);
-        started = true;
-    }
-    // Test HLS
-    if (!started && episode.hlsUrl) {
-        videoPlayer.src = episode.hlsUrl;
-        videoPlayer.style.display = 'block';
+    console.log(`🎮 Player mode: ${playerMode}`);
+    console.log(`📺 Episode data:`, episode);
+    
+    // Play based on selected mode
+    if (playerMode === 'direct') {
+        started = playDirectVideo(episode);
+        currentMethod = 'Direct MP4';
+    } else if (playerMode === 'hls') {
+        started = playHLSVideo(episode);
         currentMethod = 'HLS Stream';
-        console.log('🎬 Attempting HLS:', episode.hlsUrl);
-        started = true;
+    } else if (playerMode === 'iframe') {
+        started = playIframeVideo(episode);
+        currentMethod = 'Iframe Player';
+    } else {
+        // Auto mode - try all methods
+        started = playDirectVideo(episode) || playHLSVideo(episode) || playIframeVideo(episode);
+        currentMethod = 'Auto Mode';
     }
 
-    // Finally, fallback to iframe (only if enabled and direct streaming fails)
-    if (!started && episode.videoUrl && useIframeFallback) {
-        // Use iframe for Bunny CDN iframe URLs
-        const iframe = document.createElement('iframe');
-        iframe.src = episode.videoUrl;
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.allowFullscreen = true;
-        iframe.allow = 'autoplay; fullscreen';
-        iframe.setAttribute('loading', 'lazy');
-        
-        videoPlayer.style.display = 'none';
-        videoPlayer.parentNode.appendChild(iframe);
-        console.log('🎬 Using iframe fallback (iframe enabled):', episode.videoUrl);
-        started = true;
-    } else if (!started) {
-        console.log('❌ No video source available. Enable iframe fallback or check video URLs.');
-        // Show error message to user
+    // Show error if no method worked
+    if (!started) {
+        console.log('❌ No video source available');
         videoPlayer.style.display = 'none';
         const errorDiv = document.createElement('div');
         errorDiv.style.cssText = 'padding: 20px; text-align: center; color: #ff6b6b; background: #ffe0e0; border-radius: 8px; margin: 20px;';
         errorDiv.innerHTML = `
             <h3>Video Not Available</h3>
-            <p>Direct streaming failed. ${useIframeFallback ? 'Iframe fallback also failed.' : 'Enable iframe fallback in settings.'}</p>
-            <button onclick="toggleIframeFallback()" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                ${useIframeFallback ? 'Disable' : 'Enable'} Iframe Fallback
-            </button>
+            <p>No video source could be loaded. Try different player modes.</p>
+            <div style="margin-top: 10px;">
+                <button onclick="setPlayerMode('direct')" style="margin: 5px; padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Try Direct MP4</button>
+                <button onclick="setPlayerMode('hls')" style="margin: 5px; padding: 8px 16px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Try HLS</button>
+                <button onclick="setPlayerMode('iframe')" style="margin: 5px; padding: 8px 16px; background: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer;">Try Iframe</button>
+            </div>
         `;
         videoPlayer.parentNode.appendChild(errorDiv);
-    }
-    
-    // Attach error fallback: if MP4/HLS fails, show error or switch to iframe (if enabled)
-    if (started) {
-        videoPlayer.onerror = () => {
-            console.log(`❌ ${currentMethod} failed to load`);
-            if (useIframeFallback && episode.videoUrl && !videoPlayer.parentNode.querySelector('iframe')) {
-                const ifr = document.createElement('iframe');
-                ifr.src = episode.videoUrl;
-                ifr.style.width = '100%';
-                ifr.style.height = '100%';
-                ifr.style.border = 'none';
-                ifr.style.position = 'absolute';
-                ifr.style.top = '0';
-                ifr.style.left = '0';
-                ifr.allowFullscreen = true;
-                ifr.allow = 'autoplay; fullscreen';
-                videoPlayer.style.display = 'none';
-                videoPlayer.parentNode.appendChild(ifr);
-                console.log('⚠️ Fallback to iframe due to playback error');
-            } else {
-                console.log('❌ No iframe fallback available (disabled)');
-            }
-        };
-        
+    } else {
         // Success handler
         videoPlayer.onloadstart = () => {
             console.log(`✅ ${currentMethod} started loading successfully`);
+        };
+        
+        // Error handler
+        videoPlayer.onerror = () => {
+            console.log(`❌ ${currentMethod} failed to load`);
         };
     }
     
