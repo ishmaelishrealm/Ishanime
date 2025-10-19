@@ -412,7 +412,7 @@ function openPlayer(episode, anime) {
         started = true;
     }
 
-    // Finally, fallback to iframe
+    // Finally, fallback to iframe (only if direct streaming fails)
     if (!started && episode.videoUrl) {
         // Use iframe for Bunny CDN iframe URLs
         const iframe = document.createElement('iframe');
@@ -420,13 +420,16 @@ function openPlayer(episode, anime) {
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = 'none';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
         iframe.allowFullscreen = true;
         iframe.allow = 'autoplay; fullscreen';
         iframe.setAttribute('loading', 'lazy');
         
         videoPlayer.style.display = 'none';
         videoPlayer.parentNode.appendChild(iframe);
-        console.log('🎬 Using iframe:', episode.videoUrl);
+        console.log('🎬 Using iframe fallback:', episode.videoUrl);
         started = true;
     } else {
         // Attach error fallback: if MP4/HLS fails, switch to iframe automatically
@@ -437,6 +440,9 @@ function openPlayer(episode, anime) {
                 ifr.style.width = '100%';
                 ifr.style.height = '100%';
                 ifr.style.border = 'none';
+                ifr.style.position = 'absolute';
+                ifr.style.top = '0';
+                ifr.style.left = '0';
                 ifr.allowFullscreen = true;
                 ifr.allow = 'autoplay; fullscreen';
                 videoPlayer.style.display = 'none';
