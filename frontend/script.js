@@ -80,16 +80,23 @@ async function testAllThumbnails() {
 // Individual playback functions
 function playDirectVideo(episode) {
     const videoPlayer = document.getElementById('videoPlayer');
+    const videoContainer = document.getElementById('videoContainer');
     
     // Clear any existing iframe
-    const existingIframe = videoPlayer.parentNode.querySelector('iframe');
-    if (existingIframe) existingIframe.remove();
+    const existingIframe = videoContainer.querySelector('iframe');
+    if (existingIframe) {
+        existingIframe.remove();
+    }
     
     // Clear background image
-    const videoContainer = document.getElementById('videoContainer');
     if (videoContainer) {
         videoContainer.style.backgroundImage = 'none';
     }
+    
+    // Show video player
+    videoPlayer.style.display = 'block';
+    videoPlayer.style.width = '100%';
+    videoPlayer.style.height = '100%';
     
     // Try different MP4 qualities - use the correct Bunny CDN format
     const mp4Urls = [
@@ -106,7 +113,11 @@ function playDirectVideo(episode) {
         if (mp4.url) {
             console.log(`🎬 Trying Direct MP4 ${mp4.quality}:`, mp4.url);
             videoPlayer.src = mp4.url;
-            videoPlayer.style.display = 'block';
+            
+            // Add event listeners for debugging
+            videoPlayer.onloadstart = () => console.log(`✅ ${mp4.quality} started loading`);
+            videoPlayer.oncanplay = () => console.log(`✅ ${mp4.quality} can play`);
+            videoPlayer.onerror = (e) => console.log(`❌ ${mp4.quality} error:`, e);
             
             // Test if URL is accessible
             testVideoUrl(mp4.url, mp4.quality);
@@ -138,39 +149,80 @@ async function testVideoUrl(url, quality) {
 // Manual test function for debugging
 function testCurrentVideo() {
     const videoPlayer = document.getElementById('videoPlayer');
+    const iframe = document.getElementById('bunnyIframe');
+    
     console.log('🔍 Current video debug info:');
-    console.log('  src:', videoPlayer.src);
-    console.log('  readyState:', videoPlayer.readyState);
-    console.log('  networkState:', videoPlayer.networkState);
-    console.log('  error:', videoPlayer.error);
-    console.log('  paused:', videoPlayer.paused);
-    console.log('  currentTime:', videoPlayer.currentTime);
-    console.log('  duration:', videoPlayer.duration);
+    console.log('  Video Player src:', videoPlayer.src);
+    console.log('  Video Player readyState:', videoPlayer.readyState);
+    console.log('  Video Player networkState:', videoPlayer.networkState);
+    console.log('  Video Player error:', videoPlayer.error);
+    console.log('  Video Player paused:', videoPlayer.paused);
+    console.log('  Video Player currentTime:', videoPlayer.currentTime);
+    console.log('  Video Player duration:', videoPlayer.duration);
+    console.log('  Video Player display:', videoPlayer.style.display);
+    
+    if (iframe) {
+        console.log('  Iframe src:', iframe.src);
+        console.log('  Iframe display:', iframe.style.display);
+    }
+    
+    // Test current episode URLs
+    if (currentAnime && currentAnime.episodes && currentAnime.episodes[currentEpisodeIndex]) {
+        const episode = currentAnime.episodes[currentEpisodeIndex];
+        console.log('🧪 Testing all URLs for current episode:', episode.id);
+        
+        // Test all possible URLs
+        const testUrls = [
+            { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_1080p.mp4`, type: 'Direct MP4 1080p' },
+            { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_720p.mp4`, type: 'Direct MP4 720p' },
+            { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play_480p.mp4`, type: 'Direct MP4 480p' },
+            { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/play.mp4`, type: 'Direct MP4 Default' },
+            { url: `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/playlist.m3u8`, type: 'HLS Stream' },
+            { url: `https://iframe.mediadelivery.net/play/506159/${episode.id}`, type: 'Iframe Player' }
+        ];
+        
+        testUrls.forEach(test => {
+            testVideoUrl(test.url, test.type);
+        });
+    }
     
     if (videoPlayer.src) {
-        testVideoUrl(videoPlayer.src, 'Current');
+        testVideoUrl(videoPlayer.src, 'Current Video Player');
     }
 }
 
 function playHLSVideo(episode) {
     const videoPlayer = document.getElementById('videoPlayer');
+    const videoContainer = document.getElementById('videoContainer');
     
     // Clear any existing iframe
-    const existingIframe = videoPlayer.parentNode.querySelector('iframe');
-    if (existingIframe) existingIframe.remove();
+    const existingIframe = videoContainer.querySelector('iframe');
+    if (existingIframe) {
+        existingIframe.remove();
+    }
     
     // Clear background image
-    const videoContainer = document.getElementById('videoContainer');
     if (videoContainer) {
         videoContainer.style.backgroundImage = 'none';
     }
+    
+    // Show video player
+    videoPlayer.style.display = 'block';
+    videoPlayer.style.width = '100%';
+    videoPlayer.style.height = '100%';
     
     // Use the correct HLS URL format
     const hlsUrl = `https://vz-a01fffb9-e7a.b-cdn.net/${episode.id}/playlist.m3u8`;
     
     console.log('🎬 HLS Stream:', hlsUrl);
+    console.log('🎬 Episode ID:', episode.id);
+    
     videoPlayer.src = hlsUrl;
-    videoPlayer.style.display = 'block';
+    
+    // Add event listeners for debugging
+    videoPlayer.onloadstart = () => console.log('✅ HLS started loading');
+    videoPlayer.oncanplay = () => console.log('✅ HLS can play');
+    videoPlayer.onerror = (e) => console.log('❌ HLS error:', e);
     
     // Test if URL is accessible
     testVideoUrl(hlsUrl, 'HLS');
@@ -179,32 +231,42 @@ function playHLSVideo(episode) {
 
 function playIframeVideo(episode) {
     const videoPlayer = document.getElementById('videoPlayer');
+    const videoContainer = document.getElementById('videoContainer');
+    
+    // Clear any existing iframe first
+    const existingIframe = videoContainer.querySelector('iframe');
+    if (existingIframe) {
+        existingIframe.remove();
+    }
     
     // Use the correct iframe URL format
     const iframeUrl = `https://iframe.mediadelivery.net/play/506159/${episode.id}`;
     
     console.log('🎬 Iframe Player (Default):', iframeUrl);
+    console.log('🎬 Episode ID:', episode.id);
     
     const iframe = document.createElement('iframe');
     iframe.id = 'bunnyIframe';
     iframe.src = iframeUrl;
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    iframe.style.position = 'absolute';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
-    iframe.style.objectFit = 'contain';
+    iframe.style.cssText = `
+        width: 100%;
+        height: 100%;
+        border: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    `;
     iframe.allowFullscreen = true;
     iframe.allow = 'autoplay; fullscreen; picture-in-picture';
     iframe.setAttribute('loading', 'lazy');
     iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
     
     // Hide video player and show iframe
     videoPlayer.style.display = 'none';
     
     // Set background image for the container
-    const videoContainer = document.getElementById('videoContainer');
     if (videoContainer) {
         videoContainer.style.backgroundImage = `url('/public/assets/ishanime-logo.png')`;
         videoContainer.style.backgroundSize = 'contain';
@@ -212,7 +274,17 @@ function playIframeVideo(episode) {
         videoContainer.style.backgroundPosition = 'center';
     }
     
-    videoPlayer.parentNode.appendChild(iframe);
+    // Add iframe to container
+    videoContainer.appendChild(iframe);
+    
+    // Add load event listener
+    iframe.onload = function() {
+        console.log('✅ Iframe loaded successfully');
+    };
+    
+    iframe.onerror = function() {
+        console.log('❌ Iframe failed to load');
+    };
     
     // Test if URL is accessible
     testVideoUrl(iframeUrl, 'Iframe');
@@ -656,18 +728,38 @@ function openPlayer(episode, anime) {
     const playerTitle = document.getElementById('playerTitle');
     const playerEpisode = document.getElementById('playerEpisode');
     const videoPlayer = document.getElementById('videoPlayer');
+    const videoContainer = document.getElementById('videoContainer');
     const episodeList = document.getElementById('episodeList');
     
     // Update player info
-    playerTitle.textContent = anime.title;
-    playerEpisode.textContent = `Episode ${episode.episode}: ${episode.title}`;
+    if (playerTitle) playerTitle.textContent = anime.title;
+    if (playerEpisode) playerEpisode.textContent = `Episode ${episode.episode}: ${episode.title}`;
     
-    // Clear previous players
-    const existingIframe = videoPlayer.parentNode.querySelector('iframe');
-    if (existingIframe) existingIframe.remove();
-    videoPlayer.pause();
-    videoPlayer.removeAttribute('src');
-    videoPlayer.load();
+    // Clear previous players completely
+    if (videoContainer) {
+        // Remove any existing iframe
+        const existingIframe = videoContainer.querySelector('iframe');
+        if (existingIframe) {
+            existingIframe.remove();
+        }
+        
+        // Remove any error messages
+        const errorDiv = videoContainer.querySelector('div[style*="color: #ff6b6b"]');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+        
+        // Clear background image
+        videoContainer.style.backgroundImage = 'none';
+    }
+    
+    // Reset video player
+    if (videoPlayer) {
+        videoPlayer.pause();
+        videoPlayer.removeAttribute('src');
+        videoPlayer.load();
+        videoPlayer.style.display = 'none'; // Hide by default
+    }
     
     // Add player mode selector if not exists
     addPlayerModeSelector();
@@ -677,6 +769,7 @@ function openPlayer(episode, anime) {
     
     console.log(`🎮 Player mode: ${playerMode}`);
     console.log(`📺 Episode data:`, episode);
+    console.log(`🎬 Episode ID:`, episode.id);
     
     // Play based on selected mode
     if (playerMode === 'direct') {
