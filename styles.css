@@ -854,6 +854,33 @@ body {
     box-shadow: 0 4px 15px rgba(255, 46, 151, 0.4);
 }
 
+.episode-duration {
+    color: #888;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.anime-detail-actions {
+    margin-top: 1rem;
+}
+
+.play-all-btn {
+    background: linear-gradient(90deg, #ff2e97, #ff6ba9);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.play-all-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 46, 151, 0.4);
+}
+
 /* Mobile responsiveness for anime detail popup */
 @media (max-width: 768px) {
     .anime-detail-content {
