@@ -7,35 +7,7 @@ let currentFilter = 'all';
 let currentAnime = null;
 let currentEpisodeIndex = 0;
 let isPlaying = false;
-let hlsInstance = null;
-
-function destroyHls() {
-    if (hlsInstance) {
-        try { hlsInstance.destroy(); } catch (_) { /* no-op */ }
-        hlsInstance = null;
-    }
-}
-
-function playWithHlsIfPossible(videoEl, hlsUrl) {
-    // Prefer HLS for smoother playback and less buffering
-    if (window.Hls && window.Hls.isSupported()) {
-        destroyHls();
-        hlsInstance = new Hls({
-            enableWorker: true,
-            lowLatencyMode: true,
-            backBufferLength: 60
-        });
-        hlsInstance.attachMedia(videoEl);
-        hlsInstance.loadSource(hlsUrl);
-        return true;
-    }
-    if (videoEl.canPlayType && videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-        // Safari native HLS
-        videoEl.src = hlsUrl;
-        return true;
-    }
-    return false;
-}
+// Revert to simple player logic (previous stable version)
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -368,11 +340,11 @@ function createAnimeCard(anime) {
     
     // Get the best available thumbnail
     const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
-    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || '/assets/ishanime-logo.png';
+    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || '/public/assets/ishanime-logo.png';
     
     card.innerHTML = `
         <img src="${thumbnail}" alt="${anime.title}" class="show-thumbnail" 
-             onerror="this.src='/assets/ishanime-logo.png'" 
+             onerror="this.src='/public/assets/ishanime-logo.png'" 
              loading="lazy">
         <div class="show-info">
             <h3 class="show-title">${anime.title}</h3>
@@ -407,26 +379,15 @@ function openPlayer(episode, anime) {
     playerEpisode.textContent = `Episode ${episode.episode}: ${episode.title}`;
     
     // Clear previous players
-    destroyHls();
     const existingIframe = videoPlayer.parentNode.querySelector('iframe');
     if (existingIframe) existingIframe.remove();
     videoPlayer.pause();
     videoPlayer.removeAttribute('src');
     videoPlayer.load();
-    videoPlayer.crossOrigin = 'anonymous';
     
-    // Prefer HLS first for adaptive streaming
+    // Try MP4s first (previous stable behavior), then HLS, then iframe
     let started = false;
-    if (episode.hlsUrl) {
-        started = playWithHlsIfPossible(videoPlayer, episode.hlsUrl);
-        if (started) {
-            videoPlayer.style.display = 'block';
-            console.log('🎬 Using HLS:', episode.hlsUrl);
-        }
-    }
-
-    // If HLS not available, try MP4s
-    if (!started && episode.directMp4_1080p) {
+    if (episode.directMp4_1080p) {
         videoPlayer.src = episode.directMp4_1080p;
         videoPlayer.style.display = 'block';
         console.log('🎬 Using direct MP4 1080p:', episode.directMp4_1080p);
@@ -442,6 +403,12 @@ function openPlayer(episode, anime) {
         videoPlayer.src = episode.directMp4_480p;
         videoPlayer.style.display = 'block';
         console.log('🎬 Using direct MP4 480p:', episode.directMp4_480p);
+        started = true;
+    }
+    if (!started && episode.hlsUrl) {
+        videoPlayer.src = episode.hlsUrl;
+        videoPlayer.style.display = 'block';
+        console.log('🎬 Using HLS:', episode.hlsUrl);
         started = true;
     }
 
