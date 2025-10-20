@@ -81,6 +81,16 @@
         </div>
         <img id="test4" class="test-image" alt="Test 4">
     </div>
+    
+    <div class="test-card">
+        <h3>Test 5: One Punch Man S3 (Should use local asset)</h3>
+        <div class="test-info">
+            <strong>Anime:</strong> One-Punch Man S3<br>
+            <strong>Expected:</strong> Local asset (assets/One-Punch Man S3.webp)<br>
+            <strong>Status:</strong> <span id="status5" class="status">Testing...</span>
+        </div>
+        <img id="test5" class="test-image" alt="Test 5">
+    </div>
 
     <script>
         // Copy the thumbnail functions from script.js
@@ -120,6 +130,14 @@
                 return 'assets/Hero Without a Class Who Even Needs Skills.jpg';
             }
             
+            // One Punch Man Season 3
+            if (anime.title.toLowerCase().includes('one') || 
+                anime.title.toLowerCase().includes('punch') || 
+                anime.title.toLowerCase().includes('man') || 
+                anime.title.toLowerCase().includes('saitama')) {
+                return 'assets/One-Punch Man S3.webp';
+            }
+            
             return null;
         }
 
@@ -157,6 +175,11 @@
         const testAnime4 = {
             title: "Mugen Gacha",
             episodes: [{ thumbnailPreview: "https://cdn.example.com/thumb4.jpg" }]
+        };
+
+        const testAnime5 = {
+            title: "One-Punch Man S3",
+            episodes: [{ thumbnailPreview: "https://cdn.example.com/thumb5.jpg" }]
         };
 
         // Test 1: Should use local asset
@@ -219,11 +242,27 @@
             status4.className = 'status fallback';
         };
 
+        // Test 5: Should use local asset
+        const thumbnail5 = getAnimeThumbnail(testAnime5);
+        const img5 = document.getElementById('test5');
+        const status5 = document.getElementById('status5');
+        
+        img5.src = thumbnail5;
+        img5.onload = () => {
+            status5.textContent = '✅ Local Asset Loaded';
+            status5.className = 'status success';
+        };
+        img5.onerror = () => {
+            status5.textContent = '❌ Local Asset Failed';
+            status5.className = 'status fallback';
+        };
+
         console.log('🧪 Thumbnail System Test Results:');
         console.log('Test 1 (Eminence in Shadow):', thumbnail1);
         console.log('Test 2 (Kaiju No. 8):', thumbnail2);
         console.log('Test 3 (My Hero Academia):', thumbnail3);
         console.log('Test 4 (Mugen Gacha):', thumbnail4);
+        console.log('Test 5 (One Punch Man S3):', thumbnail5);
     </script>
 </body>
 </html>

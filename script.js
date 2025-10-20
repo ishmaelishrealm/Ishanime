@@ -775,6 +775,14 @@ function getLocalAnimeThumbnail(anime) {
         return 'assets/Hero Without a Class Who Even Needs Skills.jpg';
     }
     
+    // One Punch Man Season 3
+    if (anime.title.toLowerCase().includes('one') || 
+        anime.title.toLowerCase().includes('punch') || 
+        anime.title.toLowerCase().includes('man') || 
+        anime.title.toLowerCase().includes('saitama')) {
+        return 'assets/One-Punch Man S3.webp';
+    }
+    
     return null; // No local asset found
 }
 
