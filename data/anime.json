@@ -176,15 +176,15 @@
       ]
     },
     {
-      "id": "ansatsusha-de-aru-ore-no-status-02",
-      "name": "Ansatsusha de Aru Ore no Status 02",
-      "title": "Ansatsusha de Aru Ore no Status 02",
-      "slug": "ansatsusha-de-aru-ore-no-status-02",
+      "id": "my-status-as-an-assassin-obviously-exceeds-the-heros-02",
+      "name": "My Status as an Assassin Obviously Exceeds the Hero's 02",
+      "title": "My Status as an Assassin Obviously Exceeds the Hero's 02",
+      "slug": "my-status-as-an-assassin-obviously-exceeds-the-heros-02",
       "episodes": [
         {
           "id": "f4eaea7d-a824-403b-a401-08ce8988e519",
           "episode": "01",
-          "title": "Ansatsusha de Aru Ore no Status 02",
+          "title": "My Status as an Assassin Obviously Exceeds the Hero's 02",
           "videoUrl": "https://iframe.mediadelivery.net/play/506159/f4eaea7d-a824-403b-a401-08ce8988e519",
           "directMp4": "https://vz-a01fffb9-e7a.b-cdn.net/f4eaea7d-a824-403b-a401-08ce8988e519/play_720p.mp4",
           "directMp4_480p": "https://vz-a01fffb9-e7a.b-cdn.net/f4eaea7d-a824-403b-a401-08ce8988e519/play_480p.mp4",
@@ -328,15 +328,15 @@
       ]
     },
     {
-      "id": "ansatsusha-de-aru-ore-no-status-01",
-      "name": "Ansatsusha de Aru Ore no Status 01",
-      "title": "Ansatsusha de Aru Ore no Status 01",
-      "slug": "ansatsusha-de-aru-ore-no-status-01",
+      "id": "my-status-as-an-assassin-obviously-exceeds-the-heros-01",
+      "name": "My Status as an Assassin Obviously Exceeds the Hero's 01",
+      "title": "My Status as an Assassin Obviously Exceeds the Hero's 01",
+      "slug": "my-status-as-an-assassin-obviously-exceeds-the-heros-01",
       "episodes": [
         {
           "id": "e477f879-82c8-4e70-af77-512785ecc487",
           "episode": "01",
-          "title": "Ansatsusha de Aru Ore no Status 01",
+          "title": "My Status as an Assassin Obviously Exceeds the Hero's 01",
           "videoUrl": "https://iframe.mediadelivery.net/play/506159/e477f879-82c8-4e70-af77-512785ecc487",
           "directMp4": "https://vz-a01fffb9-e7a.b-cdn.net/e477f879-82c8-4e70-af77-512785ecc487/play_720p.mp4",
           "directMp4_480p": "https://vz-a01fffb9-e7a.b-cdn.net/e477f879-82c8-4e70-af77-512785ecc487/play_480p.mp4",
@@ -352,7 +352,7 @@
     }
   ],
   "count": 8,
-  "timestamp": "2025-10-19T07:33:45.604Z",
+  "timestamp": "2025-10-20T05:57:22.180Z",
   "generated": true,
   "source": "BunnyCDN Video Library",
   "version": "1.0.0"
