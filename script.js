@@ -721,21 +721,49 @@ function displayAnime(anime) {
     });
 }
 
+// Get anime thumbnail with local asset fallback
+function getAnimeThumbnail(anime) {
+    // First, try to find a local asset that matches the anime
+    const localThumbnail = getLocalAnimeThumbnail(anime);
+    if (localThumbnail) {
+        console.log(`🖼️ Using local thumbnail for ${anime.title}: ${localThumbnail}`);
+        return localThumbnail;
+    }
+    
+    // Fallback to Bunny CDN thumbnails
+    const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
+    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishanime-logo.png';
+    
+    console.log(`🖼️ Using CDN thumbnail for ${anime.title}: ${thumbnail}`);
+    return thumbnail;
+}
+
+// Check for local anime thumbnail assets
+function getLocalAnimeThumbnail(anime) {
+    // Common anime title variations for "The Eminence in Shadow"
+    if (anime.title.toLowerCase().includes('ansatsusha') || 
+        anime.title.toLowerCase().includes('eminence') || 
+        anime.title.toLowerCase().includes('shadow')) {
+        return 'assets/Ansatsusha de Aru Ore no Status.jpg';
+    }
+    
+    // You can add more anime mappings here as you add more assets
+    // Example:
+    // if (anime.title.toLowerCase().includes('naruto')) {
+    //     return 'assets/Naruto.jpg';
+    // }
+    
+    return null; // No local asset found
+}
+
 // Create an anime card element
 function createAnimeCard(anime) {
     const card = document.createElement('div');
     card.className = 'show-card';
     card.onclick = () => openAnimeDetailPopup(anime);
     
-    // Get the best available thumbnail with debugging
-    const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
-    const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishanime-logo.png';
-    
-    // Debug thumbnail URLs
-    console.log(`🖼️ Anime: ${anime.title}`);
-    console.log(`   Thumbnail Preview: ${firstEpisode?.thumbnailPreview || 'N/A'}`);
-    console.log(`   Thumbnail: ${firstEpisode?.thumbnail || 'N/A'}`);
-    console.log(`   Using: ${thumbnail}`);
+    // Get thumbnail with local asset priority
+    const thumbnail = getAnimeThumbnail(anime);
     
     // Test thumbnail URL if it's from Bunny CDN
     if (thumbnail.includes('b-cdn.net')) {
@@ -1283,9 +1311,8 @@ function openAnimeDetailPopup(anime) {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     
-    // Get the best thumbnail for the poster
-    const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
-    const posterImage = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishanime-logo.png';
+    // Get the best thumbnail for the poster (with local asset priority)
+    const posterImage = getAnimeThumbnail(anime);
     
     // Generate episode count and duration info
     const episodeCount = anime.episodes ? anime.episodes.length : 0;
@@ -1321,7 +1348,7 @@ function openAnimeDetailPopup(anime) {
             <div class="episodes-grid">
                 ${anime.episodes ? anime.episodes.map((episode, index) => `
                     <div class="episode-card" onclick="playEpisodeFromPopup('${anime.id}', ${index})">
-                        <img src="${episode.thumbnailPreview || episode.thumbnail || 'assets/ishanime-logo.png'}" 
+                        <img src="${getAnimeThumbnail(anime)}" 
                              alt="${episode.title || `Episode ${episode.episode}`}" 
                              class="episode-thumbnail"
                              onerror="this.src='assets/ishanime-logo.png'"
