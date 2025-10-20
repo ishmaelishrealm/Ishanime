@@ -788,7 +788,7 @@ function getLocalAnimeThumbnail(anime) {
     if (anime.title.toLowerCase().includes('my status') || 
         anime.title.toLowerCase().includes('assassin') || 
         anime.title.toLowerCase().includes('obviously exceeds')) {
-        return 'assets/Ansatsusha de Aru Ore no Status.jpg';
+        return 'assets/My Status as an Assassin Obviously Exceeds the Hero\'s.jpg';
     }
     
     return null; // No local asset found
