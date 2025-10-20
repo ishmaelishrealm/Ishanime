@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Thumbnail System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            padding: 20px;
+        }
+        .test-card {
+            background: #1a1a1a;
+            border: 1px solid #ff2e97;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            max-width: 400px;
+        }
+        .test-image {
+            width: 100%;
+            max-width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .test-info {
+            margin: 10px 0;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #4CAF50; }
+        .fallback { background: #FF9800; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Thumbnail System Test</h1>
+    
+    <div class="test-card">
+        <h3>Test 1: The Eminence in Shadow (Should use local asset)</h3>
+        <div class="test-info">
+            <strong>Anime:</strong> Ansatsusha de Aru Ore no Status 01<br>
+            <strong>Expected:</strong> Local asset (assets/Ansatsusha de Aru Ore no Status.jpg)<br>
+            <strong>Status:</strong> <span id="status1" class="status">Testing...</span>
+        </div>
+        <img id="test1" class="test-image" alt="Test 1">
+    </div>
+    
+    <div class="test-card">
+        <h3>Test 2: Kaiju No. 8 (Should use local asset)</h3>
+        <div class="test-info">
+            <strong>Anime:</strong> Kaijuu 8<br>
+            <strong>Expected:</strong> Local asset (assets/Kaijuu 8.jpg)<br>
+            <strong>Status:</strong> <span id="status2" class="status">Testing...</span>
+        </div>
+        <img id="test2" class="test-image" alt="Test 2">
+    </div>
+    
+    <div class="test-card">
+        <h3>Test 3: My Hero Academia (Should use local asset)</h3>
+        <div class="test-info">
+            <strong>Anime:</strong> Boku no Hero Academia final<br>
+            <strong>Expected:</strong> Local asset (assets/Boku no Hero Academia final.webp)<br>
+            <strong>Status:</strong> <span id="status3" class="status">Testing...</span>
+        </div>
+        <img id="test3" class="test-image" alt="Test 3">
+    </div>
+    
+    <div class="test-card">
+        <h3>Test 4: Mugen Gacha (Should use local asset)</h3>
+        <div class="test-info">
+            <strong>Anime:</strong> Mugen Gacha<br>
+            <strong>Expected:</strong> Local asset (assets/My Gift Lvl 9999 Unlimited Gacha.webp)<br>
+            <strong>Status:</strong> <span id="status4" class="status">Testing...</span>
+        </div>
+        <img id="test4" class="test-image" alt="Test 4">
+    </div>
+
+    <script>
+        // Copy the thumbnail functions from script.js
+        function getLocalAnimeThumbnail(anime) {
+            // The Eminence in Shadow
+            if (anime.title.toLowerCase().includes('ansatsusha') || 
+                anime.title.toLowerCase().includes('eminence') || 
+                anime.title.toLowerCase().includes('shadow')) {
+                return 'assets/Ansatsusha de Aru Ore no Status.jpg';
+            }
+            
+            // Kaiju No. 8
+            if (anime.title.toLowerCase().includes('kaijuu') || 
+                anime.title.toLowerCase().includes('kaiju')) {
+                return 'assets/Kaijuu 8.jpg';
+            }
+            
+            // My Hero Academia Final
+            if (anime.title.toLowerCase().includes('boku') || 
+                anime.title.toLowerCase().includes('hero') || 
+                anime.title.toLowerCase().includes('academia')) {
+                return 'assets/Boku no Hero Academia final.webp';
+            }
+            
+            // Mugen Gacha (My Gift Lvl 9999 Unlimited Gacha)
+            if (anime.title.toLowerCase().includes('mugen') || 
+                anime.title.toLowerCase().includes('gacha') || 
+                anime.title.toLowerCase().includes('gift') || 
+                anime.title.toLowerCase().includes('9999')) {
+                return 'assets/My Gift Lvl 9999 Unlimited Gacha.webp';
+            }
+            
+            // Hero Without a Class Who Even Needs Skills
+            if (anime.title.toLowerCase().includes('class') || 
+                anime.title.toLowerCase().includes('skills') || 
+                anime.title.toLowerCase().includes('without')) {
+                return 'assets/Hero Without a Class Who Even Needs Skills.jpg';
+            }
+            
+            return null;
+        }
+
+        function getAnimeThumbnail(anime) {
+            const localThumbnail = getLocalAnimeThumbnail(anime);
+            if (localThumbnail) {
+                console.log(`🖼️ Using local thumbnail for ${anime.title}: ${localThumbnail}`);
+                return localThumbnail;
+            }
+            
+            // For testing, use a placeholder for CDN thumbnails
+            const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
+            const thumbnail = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishanime-logo.png';
+            
+            console.log(`🖼️ Using CDN thumbnail for ${anime.title}: ${thumbnail}`);
+            return thumbnail;
+        }
+
+        // Test data
+        const testAnime1 = {
+            title: "Ansatsusha de Aru Ore no Status 01",
+            episodes: [{ thumbnailPreview: "https://cdn.example.com/thumb1.jpg" }]
+        };
+
+        const testAnime2 = {
+            title: "Kaijuu 8",
+            episodes: [{ thumbnailPreview: "https://cdn.example.com/thumb2.jpg" }]
+        };
+
+        const testAnime3 = {
+            title: "Boku no Hero Academia final",
+            episodes: [{ thumbnailPreview: "https://cdn.example.com/thumb3.jpg" }]
+        };
+
+        const testAnime4 = {
+            title: "Mugen Gacha",
+            episodes: [{ thumbnailPreview: "https://cdn.example.com/thumb4.jpg" }]
+        };
+
+        // Test 1: Should use local asset
+        const thumbnail1 = getAnimeThumbnail(testAnime1);
+        const img1 = document.getElementById('test1');
+        const status1 = document.getElementById('status1');
+        
+        img1.src = thumbnail1;
+        img1.onload = () => {
+            status1.textContent = '✅ Local Asset Loaded';
+            status1.className = 'status success';
+        };
+        img1.onerror = () => {
+            status1.textContent = '❌ Local Asset Failed';
+            status1.className = 'status fallback';
+        };
+
+        // Test 2: Should use local asset
+        const thumbnail2 = getAnimeThumbnail(testAnime2);
+        const img2 = document.getElementById('test2');
+        const status2 = document.getElementById('status2');
+        
+        img2.src = thumbnail2;
+        img2.onload = () => {
+            status2.textContent = '✅ Local Asset Loaded';
+            status2.className = 'status success';
+        };
+        img2.onerror = () => {
+            status2.textContent = '❌ Local Asset Failed';
+            status2.className = 'status fallback';
+        };
+
+        // Test 3: Should use local asset
+        const thumbnail3 = getAnimeThumbnail(testAnime3);
+        const img3 = document.getElementById('test3');
+        const status3 = document.getElementById('status3');
+        
+        img3.src = thumbnail3;
+        img3.onload = () => {
+            status3.textContent = '✅ Local Asset Loaded';
+            status3.className = 'status success';
+        };
+        img3.onerror = () => {
+            status3.textContent = '❌ Local Asset Failed';
+            status3.className = 'status fallback';
+        };
+
+        // Test 4: Should use local asset
+        const thumbnail4 = getAnimeThumbnail(testAnime4);
+        const img4 = document.getElementById('test4');
+        const status4 = document.getElementById('status4');
+        
+        img4.src = thumbnail4;
+        img4.onload = () => {
+            status4.textContent = '✅ Local Asset Loaded';
+            status4.className = 'status success';
+        };
+        img4.onerror = () => {
+            status4.textContent = '❌ Local Asset Failed';
+            status4.className = 'status fallback';
+        };
+
+        console.log('🧪 Thumbnail System Test Results:');
+        console.log('Test 1 (Eminence in Shadow):', thumbnail1);
+        console.log('Test 2 (Kaiju No. 8):', thumbnail2);
+        console.log('Test 3 (My Hero Academia):', thumbnail3);
+        console.log('Test 4 (Mugen Gacha):', thumbnail4);
+    </script>
+</body>
+</html>

@@ -740,18 +740,40 @@ function getAnimeThumbnail(anime) {
 
 // Check for local anime thumbnail assets
 function getLocalAnimeThumbnail(anime) {
-    // Common anime title variations for "The Eminence in Shadow"
+    // The Eminence in Shadow
     if (anime.title.toLowerCase().includes('ansatsusha') || 
         anime.title.toLowerCase().includes('eminence') || 
         anime.title.toLowerCase().includes('shadow')) {
         return 'assets/Ansatsusha de Aru Ore no Status.jpg';
     }
     
-    // You can add more anime mappings here as you add more assets
-    // Example:
-    // if (anime.title.toLowerCase().includes('naruto')) {
-    //     return 'assets/Naruto.jpg';
-    // }
+    // Kaiju No. 8
+    if (anime.title.toLowerCase().includes('kaijuu') || 
+        anime.title.toLowerCase().includes('kaiju')) {
+        return 'assets/Kaijuu 8.jpg';
+    }
+    
+    // My Hero Academia Final
+    if (anime.title.toLowerCase().includes('boku') || 
+        anime.title.toLowerCase().includes('hero') || 
+        anime.title.toLowerCase().includes('academia')) {
+        return 'assets/Boku no Hero Academia final.webp';
+    }
+    
+    // Mugen Gacha (My Gift Lvl 9999 Unlimited Gacha)
+    if (anime.title.toLowerCase().includes('mugen') || 
+        anime.title.toLowerCase().includes('gacha') || 
+        anime.title.toLowerCase().includes('gift') || 
+        anime.title.toLowerCase().includes('9999')) {
+        return 'assets/My Gift Lvl 9999 Unlimited Gacha.webp';
+    }
+    
+    // Hero Without a Class Who Even Needs Skills
+    if (anime.title.toLowerCase().includes('class') || 
+        anime.title.toLowerCase().includes('skills') || 
+        anime.title.toLowerCase().includes('without')) {
+        return 'assets/Hero Without a Class Who Even Needs Skills.jpg';
+    }
     
     return null; // No local asset found
 }
