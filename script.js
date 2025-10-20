@@ -317,11 +317,21 @@ function setupEventListeners() {
     
     if (closeAnimeDetailBtn) {
         closeAnimeDetailBtn.addEventListener('click', closeAnimeDetailPopup);
+        // Add touch support for mobile
+        closeAnimeDetailBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            closeAnimeDetailPopup();
+        });
         console.log('✅ Anime detail close button event listener added');
     }
     
     if (animeDetailBackdrop) {
         animeDetailBackdrop.addEventListener('click', closeAnimeDetailPopup);
+        // Add touch support for mobile
+        animeDetailBackdrop.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            closeAnimeDetailPopup();
+        });
         console.log('✅ Anime detail backdrop event listener added');
     }
     
@@ -361,6 +371,31 @@ function setupEventListeners() {
         console.log('🎬 Video error occurred:', e);
         console.log('🎬 Video error details:', videoPlayer.error);
     });
+    
+    // Mobile touch optimizations
+    if ('ontouchstart' in window) {
+        console.log('📱 Mobile device detected - applying touch optimizations');
+        
+        // Add touch-friendly classes to interactive elements
+        document.querySelectorAll('.show-card, .episode-card, .view-toggle, .play-btn').forEach(element => {
+            element.style.touchAction = 'manipulation';
+        });
+        
+        // Prevent zoom on double tap for buttons
+        document.querySelectorAll('button, .show-card, .episode-card').forEach(element => {
+            element.addEventListener('touchend', (e) => {
+                e.preventDefault();
+            });
+        });
+        
+        // Add mobile-specific viewport meta tag if not present
+        if (!document.querySelector('meta[name="viewport"]')) {
+            const viewport = document.createElement('meta');
+            viewport.name = 'viewport';
+            viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+            document.head.appendChild(viewport);
+        }
+    }
 }
 
 // Check backend status
@@ -1243,6 +1278,11 @@ function openAnimeDetailPopup(anime) {
         return;
     }
     
+    // Prevent background scroll on mobile
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    
     // Get the best thumbnail for the poster
     const firstEpisode = anime.episodes && anime.episodes.length > 0 ? anime.episodes[0] : null;
     const posterImage = firstEpisode?.thumbnailPreview || firstEpisode?.thumbnail || 'assets/ishanime-logo.png';
@@ -1317,6 +1357,12 @@ function closeAnimeDetailPopup() {
     if (popup && backdrop) {
         popup.classList.remove('active');
         backdrop.classList.remove('active');
+        
+        // Restore background scroll on mobile
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        
         console.log('✅ Anime detail popup closed');
     }
 }
