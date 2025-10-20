@@ -811,6 +811,22 @@ function getAnimeInfo(anime) {
         };
     }
 
+    // One Punch Man Season 3
+    if (anime.title.toLowerCase().includes('one') || 
+        anime.title.toLowerCase().includes('punch') || 
+        anime.title.toLowerCase().includes('man') || 
+        anime.title.toLowerCase().includes('saitama')) {
+        return {
+            ...baseInfo,
+            title: 'One-Punch Man 3',
+            originalTitle: 'One-Punch Man Season 3',
+            description: 'The third season of One-Punch Man. Follow Saitama, a hero who can defeat any opponent with a single punch, as he continues his journey in a world full of monsters and heroes.',
+            genre: 'Action, Comedy, Sci-Fi, Superhero',
+            tags: 'Overpowered Main Characters, Parody, Seinen, Superheroes, Superpowers, Based On A Manga',
+            year: '2024'
+        };
+    }
+
     // You can add more specific anime information here
     // Example:
     // if (anime.title.toLowerCase().includes('kaijuu')) {
