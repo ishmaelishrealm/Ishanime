@@ -755,8 +755,7 @@ function getLocalAnimeThumbnail(anime) {
     
     // My Hero Academia Final
     if (anime.title.toLowerCase().includes('boku') || 
-        anime.title.toLowerCase().includes('hero') || 
-        anime.title.toLowerCase().includes('academia')) {
+        (anime.title.toLowerCase().includes('hero') && anime.title.toLowerCase().includes('academia'))) {
         return 'assets/Boku no Hero Academia final.webp';
     }
     
@@ -783,6 +782,13 @@ function getLocalAnimeThumbnail(anime) {
         anime.title.toLowerCase().includes('man') || 
         anime.title.toLowerCase().includes('saitama')) {
         return 'assets/One-Punch Man S3.webp';
+    }
+    
+    // My Status as an Assassin Obviously Exceeds the Hero's
+    if (anime.title.toLowerCase().includes('my status') || 
+        anime.title.toLowerCase().includes('assassin') || 
+        anime.title.toLowerCase().includes('obviously exceeds')) {
+        return 'assets/Ansatsusha de Aru Ore no Status.jpg';
     }
     
     return null; // No local asset found
