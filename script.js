@@ -768,8 +768,10 @@ function getLocalAnimeThumbnail(anime) {
         return 'assets/My Gift Lvl 9999 Unlimited Gacha.webp';
     }
     
-    // Hero Without a Class Who Even Needs Skills
-    if (anime.title.toLowerCase().includes('class') || 
+    // Mushoku no Eiyuu (Hero Without a Class Who Even Needs Skills)
+    if (anime.title.toLowerCase().includes('mushoku') || 
+        anime.title.toLowerCase().includes('eiyuu') || 
+        anime.title.toLowerCase().includes('class') || 
         anime.title.toLowerCase().includes('skills') || 
         anime.title.toLowerCase().includes('without')) {
         return 'assets/Hero Without a Class Who Even Needs Skills.jpg';
@@ -784,6 +786,42 @@ function getLocalAnimeThumbnail(anime) {
     }
     
     return null; // No local asset found
+}
+
+// Get enhanced anime information with descriptions
+function getAnimeInfo(anime) {
+    const baseInfo = {
+        title: anime.title,
+        description: anime.description || 'No description available.',
+        genre: anime.genre || 'Anime',
+        episodes: anime.episodes ? anime.episodes.length : 0
+    };
+
+    // Add specific information for known anime
+    if (anime.title.toLowerCase().includes('mushoku') || 
+        anime.title.toLowerCase().includes('eiyuu')) {
+        return {
+            ...baseInfo,
+            title: 'Hero Without a Class: Who Even Needs Skills?!',
+            originalTitle: 'Mushoku no Eiyuu: Betsu ni Skill Nanka Ira Nakattan Daga',
+            description: '"Classes" are given at the age of 10, and the presence or absence of "skills" greatly affect life. Arel, the son of "Sword Princess" Fara and "Magic King" Leon, has been branded as "Classless"... But even without a job or skills, Arel believes he can persevere through effort.',
+            genre: 'Action, Adventure, Comedy, Fantasy, Harem',
+            tags: 'Based On A Light Novel',
+            year: '2024'
+        };
+    }
+
+    // You can add more specific anime information here
+    // Example:
+    // if (anime.title.toLowerCase().includes('kaijuu')) {
+    //     return {
+    //         ...baseInfo,
+    //         description: 'Kaiju No. 8 follows Kafka Hibino, a man who transforms into a kaiju and joins the Defense Force to fight monsters.',
+    //         genre: 'Action, Sci-Fi, Supernatural'
+    //     };
+    // }
+
+    return baseInfo;
 }
 
 // Create an anime card element
@@ -1344,6 +1382,9 @@ function openAnimeDetailPopup(anime) {
     // Get the best thumbnail for the poster (with local asset priority)
     const posterImage = getAnimeThumbnail(anime);
     
+    // Get enhanced anime information
+    const animeInfo = getAnimeInfo(anime);
+    
     // Generate episode count and duration info
     const episodeCount = anime.episodes ? anime.episodes.length : 0;
     const totalDuration = anime.episodes ? anime.episodes.reduce((total, ep) => total + (ep.duration || 0), 0) : 0;
@@ -1355,16 +1396,19 @@ function openAnimeDetailPopup(anime) {
             <img src="${posterImage}" alt="${anime.title}" class="anime-detail-poster" 
                  onerror="this.src='assets/ishanime-logo.png'">
             <div class="anime-detail-meta">
-                <h2 class="anime-detail-title">${anime.title}</h2>
+                <h2 class="anime-detail-title">${animeInfo.title}</h2>
+                ${animeInfo.originalTitle ? `<h3 class="anime-detail-original-title">${animeInfo.originalTitle}</h3>` : ''}
                 <div class="anime-detail-stats">
                     <div class="anime-detail-stat">📺 ${episodeCount} Episodes</div>
                     <div class="anime-detail-stat">⏱️ ${avgDuration > 0 ? avgDuration + ' min avg' : 'Duration unknown'}</div>
-                    <div class="anime-detail-stat">🎬 ${anime.genre || 'Anime'}</div>
+                    <div class="anime-detail-stat">🎬 ${animeInfo.genre}</div>
+                    ${animeInfo.year ? `<div class="anime-detail-stat">📅 ${animeInfo.year}</div>` : ''}
                     <div class="anime-detail-stat">🆔 ${anime.id}</div>
                 </div>
                 <p class="anime-detail-description">
-                    ${anime.description || 'An exciting anime series with engaging characters and thrilling adventures. Watch now to discover the story!'}
+                    ${animeInfo.description}
                 </p>
+                ${animeInfo.tags ? `<div class="anime-detail-tags">🏷️ ${animeInfo.tags}</div>` : ''}
                 <div class="anime-detail-actions">
                     <button class="play-all-btn" onclick="playEpisodeFromPopup('${anime.id}', 0)">
                         ▶ Play First Episode

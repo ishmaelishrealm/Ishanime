@@ -91,6 +91,16 @@
         </div>
         <img id="test5" class="test-image" alt="Test 5">
     </div>
+    
+    <div class="test-card">
+        <h3>Test 6: Mushoku no Eiyuu (Should use local asset)</h3>
+        <div class="test-info">
+            <strong>Anime:</strong> Mushoku no Eiyuu<br>
+            <strong>Expected:</strong> Local asset (assets/Hero Without a Class Who Even Needs Skills.jpg)<br>
+            <strong>Status:</strong> <span id="status6" class="status">Testing...</span>
+        </div>
+        <img id="test6" class="test-image" alt="Test 6">
+    </div>
 
     <script>
         // Copy the thumbnail functions from script.js
@@ -123,8 +133,10 @@
                 return 'assets/My Gift Lvl 9999 Unlimited Gacha.webp';
             }
             
-            // Hero Without a Class Who Even Needs Skills
-            if (anime.title.toLowerCase().includes('class') || 
+            // Mushoku no Eiyuu (Hero Without a Class Who Even Needs Skills)
+            if (anime.title.toLowerCase().includes('mushoku') || 
+                anime.title.toLowerCase().includes('eiyuu') || 
+                anime.title.toLowerCase().includes('class') || 
                 anime.title.toLowerCase().includes('skills') || 
                 anime.title.toLowerCase().includes('without')) {
                 return 'assets/Hero Without a Class Who Even Needs Skills.jpg';
@@ -180,6 +192,11 @@
         const testAnime5 = {
             title: "One-Punch Man S3",
             episodes: [{ thumbnailPreview: "https://cdn.example.com/thumb5.jpg" }]
+        };
+
+        const testAnime6 = {
+            title: "Mushoku no Eiyuu",
+            episodes: [{ thumbnailPreview: "https://cdn.example.com/thumb6.jpg" }]
         };
 
         // Test 1: Should use local asset
@@ -257,12 +274,28 @@
             status5.className = 'status fallback';
         };
 
+        // Test 6: Should use local asset
+        const thumbnail6 = getAnimeThumbnail(testAnime6);
+        const img6 = document.getElementById('test6');
+        const status6 = document.getElementById('status6');
+        
+        img6.src = thumbnail6;
+        img6.onload = () => {
+            status6.textContent = '✅ Local Asset Loaded';
+            status6.className = 'status success';
+        };
+        img6.onerror = () => {
+            status6.textContent = '❌ Local Asset Failed';
+            status6.className = 'status fallback';
+        };
+
         console.log('🧪 Thumbnail System Test Results:');
         console.log('Test 1 (Eminence in Shadow):', thumbnail1);
         console.log('Test 2 (Kaiju No. 8):', thumbnail2);
         console.log('Test 3 (My Hero Academia):', thumbnail3);
         console.log('Test 4 (Mugen Gacha):', thumbnail4);
         console.log('Test 5 (One Punch Man S3):', thumbnail5);
+        console.log('Test 6 (Mushoku no Eiyuu):', thumbnail6);
     </script>
 </body>
 </html>
