@@ -827,6 +827,23 @@ function getAnimeInfo(anime) {
         };
     }
 
+    // The Eminence in Shadow (Assassin de Aru Ore no Status)
+    if (anime.title.toLowerCase().includes('ansatsusha') || 
+        anime.title.toLowerCase().includes('eminence') || 
+        anime.title.toLowerCase().includes('shadow') ||
+        anime.title.toLowerCase().includes('assassin') || 
+        anime.title.toLowerCase().includes('status')) {
+        return {
+            ...baseInfo,
+            title: 'The Eminence in Shadow',
+            originalTitle: 'Ansatsusha de Aru Ore no Status ga Yuusha Yori mo Akiraka ni Tsuyoi Nodaga',
+            description: 'Cid Kagenou is a high school student who has the special "skill" of not being noticed. He, along with his classmates, are summoned to a fantasy world of sword and sorcery where they are powerful heroes tasked with defeating a dark lord by a king. With his newfound skills as an assassin, Cid soon uncovers a plot by the kingdom\'s royal family, and is cast into a labyrinth to die. He swears vengeance on the king, and seeks more power to achieve his task.',
+            genre: 'Action, Adventure, Dark Fantasy, Fantasy, Isekai',
+            tags: 'Assassins, Person In A Strange World, Summoned Into Another World, Based On A Light Novel',
+            year: '2022'
+        };
+    }
+
     // You can add more specific anime information here
     // Example:
     // if (anime.title.toLowerCase().includes('kaijuu')) {
